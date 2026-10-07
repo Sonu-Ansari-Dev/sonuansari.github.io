@@ -1,5 +1,5 @@
 /* Sonu Ansari — shared site JS: theme, nav, reveal, scroll, stats, carousel */
-document.getElementById('year').textContent = new Date().getFullYear();
+var yr = document.getElementById('year'); if (yr) yr.textContent = new Date().getFullYear();
 
 /* 0. Email de-obfuscation */
 (function () {
@@ -11,6 +11,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
 })();
 
 /* 1. Scroll reveal */
+window.__siteReady = true;
 (function () {
     var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('visible'); });
@@ -55,7 +56,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
     document.addEventListener('click', function (e) {
         if (!menu.contains(e.target) && !btn.contains(e.target)) close();
     });
-    window.addEventListener('resize', function () { if (window.innerWidth > 1024) close(); }, { passive: true });
+    window.addEventListener('resize', function () { if (window.innerWidth > 1180) close(); }, { passive: true });
 })();
 
 /* 5. Smooth scroll */
@@ -114,7 +115,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         btn = document.getElementById('themeToggle'),
         thumb = document.getElementById('themeToggleThumb');
     if (!btn) return;
-    var saved = localStorage.getItem('sonu-theme');
+    var saved = null; try { saved = localStorage.getItem('sonu-theme'); } catch (e) {}
     var initial = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
     function apply(theme) {
         root.setAttribute('data-theme', theme);
@@ -122,7 +123,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         if (mt) mt.setAttribute('content', theme === 'light' ? '#f5f7fb' : '#0a0a0f');
         thumb.textContent = theme === 'light' ? '☀' : '☾';
         btn.title = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
-        localStorage.setItem('sonu-theme', theme);
+        try { localStorage.setItem('sonu-theme', theme); } catch (e) {}
     }
     apply(initial);
     btn.addEventListener('click', function () {
@@ -159,6 +160,8 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     });
     document.addEventListener('keydown', function (e) {
         if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || '')) return;
+        var cr = track.parentNode.getBoundingClientRect();
+        if (cr.bottom < 0 || cr.top > window.innerHeight) return;
         if (e.key === 'ArrowLeft') goTo(current - 1);
         if (e.key === 'ArrowRight') goTo(current + 1);
     });
@@ -207,7 +210,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         eventsEl.textContent = '0';
         validEl.textContent = '0';
         rowsEl.textContent = '0';
-        latEl.textContent = ',';
+        latEl.textContent = '—';
         reportsEl.textContent = '0';
         deliveredEl.textContent = '0%';
         status.textContent = 'Ready, filtering active subscribers';
