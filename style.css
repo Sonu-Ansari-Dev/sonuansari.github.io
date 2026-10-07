@@ -95,7 +95,7 @@ nav.scrolled { background: color-mix(in srgb, var(--bg) 94%, transparent); box-s
 .mobile-menu-btn.active .menu-icon span:nth-child(2) { opacity: 0; }
 .mobile-menu-btn.active .menu-icon span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 1024px) {
+@media (max-width: 1180px) {
     .mobile-menu-btn { display: inline-flex; }
     .nav-links { position: absolute; top: calc(100% + .6rem); left: 0; right: 0; z-index: 20; flex-direction: column; align-items: stretch; gap: 0; padding: .55rem; background: color-mix(in srgb, var(--bg-elevated) 96%, transparent); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.18); opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-8px) scale(.98); transition: opacity .25s ease, transform .25s ease; }
     .nav-links.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1); }
@@ -315,8 +315,8 @@ footer a:hover { color: var(--accent); }
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
-.reveal.visible { opacity: 1; transform: translateY(0); }
+.js .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+.js .reveal.visible, .js.show-all .reveal { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
 
 /* ===== SCROLL TO TOP ===== */
