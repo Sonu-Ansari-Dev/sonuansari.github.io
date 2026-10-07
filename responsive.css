@@ -1,0 +1,97 @@
+/* Cross-device layer: phones (Android/iOS), tablets, laptops, large screens.
+   Loaded LAST on both pages so it wins over style.css and extras.html's inline styles. */
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+button, a, .demo-btn, .shape-btn { touch-action: manipulation; }
+h1, h2, h3, h4 { overflow-wrap: break-word; }
+
+/* ---- Safari / older browsers ---- */
+nav { -webkit-backdrop-filter: blur(20px) saturate(1.2); }
+.hero-grid-bg { -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 70%); }
+@supports not (background: color-mix(in srgb, red, blue)) {
+    nav, nav.scrolled { background: var(--bg); }
+    .nav-links { background: var(--bg-elevated); }
+    .cat-chat-head { background: var(--bg-card); }
+}
+
+/* ---- Notches / home indicator (iPhone, Android cutouts) ---- */
+nav { padding-top: calc(1rem + env(safe-area-inset-top, 0px)); padding-left: max(2rem, env(safe-area-inset-left, 0px)); padding-right: max(2rem, env(safe-area-inset-right, 0px)); }
+section { padding-left: max(2rem, env(safe-area-inset-left, 0px)); padding-right: max(2rem, env(safe-area-inset-right, 0px)); }
+footer { padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); padding-left: max(2rem, env(safe-area-inset-left, 0px)); padding-right: max(2rem, env(safe-area-inset-right, 0px)); }
+.hero { padding-top: calc(8rem + env(safe-area-inset-top, 0px)); }
+.cat-companion, .cat-restore-btn { right: max(1.25rem, env(safe-area-inset-right, 0px)); bottom: max(1.25rem, env(safe-area-inset-bottom, 0px)); }
+.scroll-top { right: max(1.25rem, env(safe-area-inset-right, 0px)); bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px)); }
+.cat-chat { right: max(1.25rem, env(safe-area-inset-right, 0px)); bottom: calc(6.6rem + env(safe-area-inset-bottom, 0px)); max-height: min(520px, calc(100dvh - 9rem)); }
+
+/* ---- Grids that could overflow narrow phones ---- */
+.roles-grid { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.project-grid { grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); }
+.skills-grid, .cert-grid { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
+.showcase-grid { grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
+
+/* ---- Swipe + scroll ---- */
+.exp-track { touch-action: pan-y; }
+.nav-links { max-height: calc(100dvh - 5.5rem); overflow-y: auto; overscroll-behavior: contain; }
+.hero { min-height: 100vh; min-height: 100dvh; }
+
+/* ---- Large screens ---- */
+@media (min-width: 1500px) {
+    .section-inner { max-width: 1240px; }
+    .nav-inner { max-width: 1360px; }
+}
+
+/* ---- Tablets ---- */
+@media (max-width: 900px) {
+    .etl-cohort, .etl-stats { grid-template-columns: repeat(2, 1fr); }
+    .lf-dashboard, .mapmatch-layout { grid-template-columns: 1fr; }
+    .about-grid { gap: 2.5rem; }
+}
+
+/* ---- Phones ---- */
+@media (max-width: 760px) {
+    nav { padding-left: max(1rem, env(safe-area-inset-left, 0px)); padding-right: max(1rem, env(safe-area-inset-right, 0px)); }
+    section, footer { padding-left: max(1rem, env(safe-area-inset-left, 0px)); padding-right: max(1rem, env(safe-area-inset-right, 0px)); }
+    .hero { padding-top: calc(6.5rem + env(safe-area-inset-top, 0px)); }
+    .stats-bar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem .75rem; margin-top: 2.5rem; }
+    .section-header h2 { font-size: 1.4rem; }
+    .section-header .line { flex-basis: 100%; max-width: none; }
+    .hero-badge { text-align: center; line-height: 1.4; }
+    .hero-cta .btn { width: 100%; justify-content: center; }
+    .recog-card, .edu-card { flex-direction: column; }
+    .exp-slide-ach-detail code { word-break: break-word; }
+}
+@media (max-width: 700px) {
+    .cat-companion, .cat-restore-btn { right: max(.75rem, env(safe-area-inset-right, 0px)); bottom: max(.85rem, env(safe-area-inset-bottom, 0px)); }
+    .scroll-top { right: max(.75rem, env(safe-area-inset-right, 0px)); bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px)); }
+    .cat-chat { right: max(.75rem, env(safe-area-inset-right, 0px)); bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px)); max-height: min(520px, calc(100dvh - 7.5rem)); }
+}
+
+/* ---- Short landscape phones ---- */
+@media (max-height: 520px) and (orientation: landscape) {
+    .hero { min-height: auto; padding-top: calc(5.5rem + env(safe-area-inset-top, 0px)); padding-bottom: 2.5rem; }
+    .cat-chat { max-height: calc(100dvh - 5.5rem); }
+}
+
+/* ---- Touch devices: bigger tap targets, no sticky hover ---- */
+@media (pointer: coarse) {
+    .mobile-menu-btn, .exp-slide-nav-btn { width: 44px; height: 44px; }
+    .theme-toggle { width: 56px; height: 34px; }
+    .theme-toggle-thumb { width: 26px; height: 26px; top: 3px; left: 3px; }
+    html[data-theme="light"] .theme-toggle-thumb { transform: translateX(22px); }
+    .nav-links a { min-height: 44px; display: flex; align-items: center; }
+    .demo-btn, .shape-btn { min-height: 40px; padding: .55rem .9rem; }
+    .contact-link, .btn { min-height: 44px; }
+    .exp-slide-dot { position: relative; }
+    .exp-slide-dot::after { content: ''; position: absolute; inset: -18px -3px; }
+    .cat-hide-btn { position: relative; }
+    .cat-hide-btn::after { content: ''; position: absolute; inset: -12px; }
+    .cat-chat-close { width: 40px; height: 40px; }
+    .cat-chat-chips button { padding: .5rem .8rem; }
+    .cat-chat-form button { width: 46px; }
+    .cat-chat-form input { padding: .7rem .8rem; }
+}
+@media (hover: none) {
+    .project-card:hover, .skill-category:hover, .role-card:hover, .cert-card:hover,
+    .exp-slide-metric:hover, .blog-card:hover, .btn-primary:hover { transform: none; }
+    .role-card:hover, .cert-card:hover { border-color: var(--border); }
+}
