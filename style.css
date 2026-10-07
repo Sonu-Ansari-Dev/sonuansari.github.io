@@ -356,3 +356,8 @@ footer a:hover { color: var(--accent); }
     .etl-arrow { display: none; }
     .etl-node { min-width: 0; flex: 1 1 calc(50% - .25rem); }
 }
+/* ===== RECOGNITION ===== */
+.recog-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; max-width: 700px; display: flex; gap: 1rem; align-items: flex-start; }
+.recog-icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #ef4444); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.recog-info h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: .25rem; }
+.recog-info p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
