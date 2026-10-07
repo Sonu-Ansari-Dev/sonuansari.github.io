@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/cat.css">
     <style>
         /* ===== CSS VARIABLES ===== */
         :root {
@@ -207,7 +208,7 @@
         .mobile-menu-btn.active .menu-icon span:nth-child(2) { opacity: 0; transform: scaleX(0); }
         .mobile-menu-btn.active .menu-icon span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        @media (max-width: 980px) {
+        @media (max-width: 1180px) {
             .mobile-menu-btn { display: inline-flex; }
             .nav-links {
                 position: absolute;
@@ -1615,12 +1616,8 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease;
-        }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .js .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+.js .reveal.visible, .js.show-all .reveal { opacity: 1; transform: translateY(0); }
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -1662,151 +1659,6 @@
         }
         .scroll-top.show { display: flex; }
         .scroll-top:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); transform: translateY(-2px); }
-
-        /* ===== CAT COMPANION ===== */
-        .cat-companion {
-            position: fixed;
-            right: 1.25rem;
-            bottom: 1.25rem;
-            z-index: 600;
-            display: flex;
-            align-items: flex-end;
-            gap: 0.4rem;
-            animation: catBob 4.5s ease-in-out infinite;
-        }
-        @keyframes catBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-        .cat-companion.hidden .cat-figure,
-        .cat-companion.hidden .cat-hide-btn,
-        .cat-companion.hidden .cat-bubble { display: none; }
-
-        .cat-figure {
-            position: relative;
-            width: 74px; height: 74px;
-            padding: 0;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            transform-origin: 50% 100%;
-            transition: transform .18s cubic-bezier(.34,1.56,.64,1);
-            filter: drop-shadow(0 8px 18px rgba(0,0,0,.28));
-            perspective: 520px;
-        }
-        .cat-figure:hover { transform: translateY(-3px) scale(1.04); }
-        .cat-figure:active { transform: translateY(0) scale(0.97); }
-        .cat-figure svg { transform-style: preserve-3d; will-change: transform; }
-        .cat-figure.pounce { animation: catPounce .5s cubic-bezier(.34,1.56,.64,1); }
-        .cat-figure.notice .cat-ear { transform: rotate(0deg) scaleY(1.12); }
-        @keyframes catPounce {
-            0%{transform:translateY(0) scale(1)}
-            30%{transform:translateY(-14px) scale(1.06) rotate(-4deg)}
-            55%{transform:translateY(2px) scale(0.97) rotate(3deg)}
-            100%{transform:translateY(0) scale(1) rotate(0deg)}
-        }
-        .cat-figure.spin { animation: catSpin .7s cubic-bezier(.34,1.56,.64,1); }
-        @keyframes catSpin {
-            0%{transform:rotate(0) scale(1)}
-            50%{transform:rotate(180deg) scale(1.15)}
-            100%{transform:rotate(360deg) scale(1)}
-        }
-        .cat-figure.purr { animation: catPurr .28s ease-in-out 4; }
-        @keyframes catPurr { 0%,100%{transform:translateY(0) scale(1,1)} 50%{transform:translateY(1px) scale(1.03,.96)} }
-        .cat-figure.scrolling .cat-tail { animation: catTailFast 0.55s ease-in-out infinite; }
-        .cat-figure.scrolling .cat-ear { transform: rotate(-6deg) scaleY(1.08); }
-        .cat-figure.blink .cat-lid { opacity: 1; }
-
-        .cat-body-fill { fill: var(--accent); }
-        .cat-body-shade { fill: var(--accent-tertiary); opacity: .35; }
-        .cat-eye-white { fill: var(--cat-eye); }
-        .cat-pupil { fill: var(--cat-pupil); transition: transform .05s linear; }
-        .cat-mouth, .cat-nose { stroke: var(--cat-mouth); }
-        .cat-nose { fill: var(--cat-mouth); }
-        .cat-ear { transform-origin: 50% 100%; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
-        .cat-tail { transform-origin: 78% 82%; animation: catTailIdle 3.6s ease-in-out infinite; }
-        @keyframes catTailIdle { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(10deg)} }
-        @keyframes catTailFast { 0%,100%{transform:rotate(-14deg)} 50%{transform:rotate(16deg)} }
-        .cat-lid { fill: var(--bg-card); opacity: 0; transform-origin: center; transition: opacity .06s linear; }
-        .cat-shadow {
-            position: absolute;
-            bottom: -7px;
-            left: 50%;
-            width: 64%; height: 12px;
-            transform: translateX(-50%);
-            background: radial-gradient(ellipse at center, rgba(0,0,0,.38) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .cat-bubble {
-            max-width: 168px;
-            padding: .5rem .7rem;
-            margin-bottom: .35rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: 12px 12px 4px 12px;
-            color: var(--text);
-            font-size: .74rem;
-            font-weight: 500;
-            line-height: 1.4;
-            box-shadow: 0 10px 30px rgba(0,0,0,.24);
-            opacity: 0;
-            transform: translateY(6px) scale(.96);
-            transition: opacity .2s ease, transform .2s ease;
-            pointer-events: none;
-        }
-        .cat-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
-
-        .cat-hide-btn {
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-dim);
-            font-size: .65rem;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            align-self: flex-start;
-            margin-top: -4px;
-            transition: all .2s ease;
-        }
-        .cat-hide-btn:hover { color: var(--text); border-color: var(--accent); }
-
-        .cat-restore-btn {
-            position: fixed;
-            right: 1.25rem;
-            bottom: 1.25rem;
-            z-index: 600;
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--accent);
-            font-size: 1.15rem;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,.24);
-            transition: all .2s ease;
-        }
-        .cat-restore-btn.show { display: flex; }
-        .cat-restore-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
-
-        @media (max-width: 700px) {
-            .cat-companion { right: .75rem; bottom: .85rem; }
-            .cat-figure { width: 58px; height: 58px; }
-            .cat-bubble { max-width: 128px; font-size: .68rem; }
-            .cat-restore-btn { right: .75rem; bottom: .85rem; width: 38px; height: 38px; }
-            .scroll-top { right: .75rem; bottom: 5.75rem; width: 38px; height: 38px; font-size: 1rem; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .cat-tail, .cat-figure.pounce, .cat-figure.scrolling .cat-tail,
-            .cat-figure.spin, .cat-figure.purr, .cat-companion { animation: none !important; }
-            .cat-figure, .cat-ear, .cat-pupil { transition: none !important; }
-        }
 
         /* ===== SHOWCASE MOBILE FIT ===== */
         #showcase svg, #showcase canvas { max-width: 100%; }
@@ -1867,7 +1719,7 @@
             } catch (e) {}
         })();
     </script>
-<base target="_blank">
+<script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.__siteReady)document.documentElement.classList.add("show-all")},3000);</script>
 </head>
 <body>
 
@@ -1877,42 +1729,7 @@
     <!-- Scroll to Top -->
     <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">↑</button>
 
-<!-- ===== CAT COMPANION ===== -->
-    <div class="cat-companion" id="catCompanion">
-        <div class="cat-bubble" id="catBubble" aria-hidden="true"></div>
-        <button class="cat-figure" id="catFigure" type="button" aria-label="Site cat, click to say hi">
-            <span class="cat-shadow" aria-hidden="true"></span>
-            <svg id="catSvg" viewBox="0 0 120 120" width="100%" height="100%" aria-hidden="true">
-                <path class="cat-tail" d="M92 92 C 112 92, 116 68, 100 58 C 112 66, 110 86, 92 88 Z" fill="var(--accent)"/>
-                <ellipse class="cat-body-fill" cx="60" cy="78" rx="34" ry="24"/>
-                <path class="cat-ear" id="catEarL" d="M32 46 L24 20 L48 38 Z" fill="var(--accent)"/>
-                <path class="cat-ear" id="catEarR" d="M88 46 L96 20 L72 38 Z" fill="var(--accent)"/>
-                <path d="M35 42 L30 26 L46 37 Z" fill="var(--accent-secondary)" opacity=".55"/>
-                <path d="M85 42 L90 26 L74 37 Z" fill="var(--accent-secondary)" opacity=".55"/>
-                <circle class="cat-body-fill" cx="60" cy="52" r="26"/>
-                <g id="catEyeL">
-                    <circle class="cat-eye-white" cx="49" cy="50" r="7.5"/>
-                    <circle class="cat-pupil" id="pupilL" cx="49" cy="50" r="3.4"/>
-                    <ellipse class="cat-lid" cx="49" cy="50" rx="8" ry="7.5"/>
-                </g>
-                <g id="catEyeR">
-                    <circle class="cat-eye-white" cx="71" cy="50" r="7.5"/>
-                    <circle class="cat-pupil" id="pupilR" cx="71" cy="50" r="3.4"/>
-                    <ellipse class="cat-lid" cx="71" cy="50" rx="8" ry="7.5"/>
-                </g>
-                <path class="cat-nose" d="M60 58 L57 62 L63 62 Z"/>
-                <path class="cat-mouth" d="M60 62 Q60 66 54 66 M60 62 Q60 66 66 66" fill="none" stroke-width="1.6" stroke-linecap="round"/>
-                <g stroke="var(--accent-secondary)" stroke-width="1" opacity=".55" stroke-linecap="round">
-                    <line x1="24" y1="54" x2="40" y2="52"/>
-                    <line x1="24" y1="60" x2="40" y2="59"/>
-                    <line x1="96" y1="54" x2="80" y2="52"/>
-                    <line x1="96" y1="60" x2="80" y2="59"/>
-                </g>
-            </svg>
-        </button>
-        <button class="cat-hide-btn" id="catHideBtn" type="button" aria-label="Hide cat companion" title="Hide cat companion">✕</button>
-    </div>
-    <button class="cat-restore-btn" id="catRestoreBtn" type="button" aria-label="Show cat companion" title="Show cat companion">🐾</button>
+
 
     
     <nav id="navbar">
@@ -2079,29 +1896,29 @@
     <section id="blog">
         <div class="section-inner">
             <div class="section-header reveal">
-                <span class="num">9.</span>
-                <h2>Latest Articles</h2>
+                <span class="num">09.</span>
+                <h2>Articles — Coming Soon</h2>
                 <div class="line"></div>
             </div>
             <div class="blog-grid">
-                <a href="#" class="blog-card reveal" onclick="alert('Full article coming soon!')">
+                <div class="blog-card reveal">
                     <span class="blog-tag">Data Engineering</span>
                     <h3>Optimizing PySpark: 5 Techniques That Cut Our Cost by 80%</h3>
                     <p>Practical strategies for profiling, partitioning, and rewriting Spark jobs to reduce processing time and infrastructure spend.</p>
-                    <span class="blog-meta">📅 15 min read · 3 min ago</span>
-                </a>
-                <a href="#" class="blog-card reveal" onclick="alert('Full article coming soon!')">
+                    <span class="blog-meta">🕒 Coming soon</span>
+                </div>
+                <div class="blog-card reveal">
                     <span class="blog-tag">IoT</span>
                     <h3>Building a Serverless IoT Pipeline with AWS Lambda and Kinesis</h3>
                     <p>From device telemetry to real-time alerts: how we built a sub-30-second streaming pipeline that processes 10,000 events per second.</p>
-                    <span class="blog-meta">📅 12 min read · 1 week ago</span>
-                </a>
-                <a href="#" class="blog-card reveal" onclick="alert('Full article coming soon!')">
+                    <span class="blog-meta">🕒 Coming soon</span>
+                </div>
+                <div class="blog-card reveal">
                     <span class="blog-tag">AI</span>
                     <h3>Running a Fully Local AI Assistant on Android with Termux and LLMs</h3>
                     <p>How I built a privacy-first AI assistant that runs entirely on-device — zero cloud, zero cost, 100% open source.</p>
-                    <span class="blog-meta">📅 20 min read · 2 weeks ago</span>
-                </a>
+                    <span class="blog-meta">🕒 Coming soon</span>
+                </div>
             </div>
         </div>
     </section>
@@ -2122,6 +1939,7 @@
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
+        window.__siteReady = true;
 // ================================================================
 // ================================================================
         // 0. CONTACT INFO DE-OBFUSCATION
@@ -2284,7 +2102,7 @@
             document.addEventListener('click', function(e) {
                 if (!menu.contains(e.target) && !btn.contains(e.target)) close();
             });
-            window.addEventListener('resize', function() { if (window.innerWidth > 980) close(); }, { passive: true });
+            window.addEventListener('resize', function() { if (window.innerWidth > 1180) close(); }, { passive: true });
         })();
 
         // ================================================================
@@ -2588,14 +2406,14 @@
                 corrEl.textContent = correction.toFixed(2);
                 leftEl.textContent = Math.round(left) + '%';
                 rightEl.textContent = Math.round(right) + '%';
-                if (running) rafId = requestAnimationFrame(frame);
+                if (running) rafId = requestAnimationFrame(frame); else rafId = null;
             }
             document.getElementById('lfStart').addEventListener('click', function() {
                 running = !running;
                 this.textContent = running ? '⏸ Pause' : '▶ Resume';
                 document.getElementById('lfStatus').textContent = running ? 'PID feedback active' :
                     'Simulation paused';
-                if (running) frame();
+                if (running && !rafId) frame();
             });
             document.getElementById('lfReset').addEventListener('click', function() {
                 t = 0;
@@ -2634,7 +2452,7 @@
                 btn = document.getElementById('themeToggle'),
                 thumb = document.getElementById('themeToggleThumb');
             if (!btn) return;
-            var saved = localStorage.getItem('sonu-theme');
+            var saved = null; try { saved = localStorage.getItem('sonu-theme'); } catch (e) {}
             var initial = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ?
                 'light' : 'dark');
 
@@ -2645,7 +2463,7 @@
                 thumb.textContent = theme === 'light' ? '☀' : '☾';
                 btn.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
                 btn.title = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
-                localStorage.setItem('sonu-theme', theme);
+                try { localStorage.setItem('sonu-theme', theme); } catch (e) {}
             }
             apply(initial);
             btn.addEventListener('click', function() { apply(root.getAttribute('data-theme') === 'light' ? 'dark' :
@@ -2809,7 +2627,7 @@
                 cy = h / 2;
             var fenceRadius = 120;
             var shape = 'circle';
-            var ngonSides = 6;
+            var ngonSides = 5;
             var t = 0;
             var rafId = null;
             var trail = [];
@@ -2958,204 +2776,8 @@
 
         // ================================================================
 // ================================================================
-        // 15. CAT COMPANION (FIXED: spin class removed after animation)
-        // ================================================================
-        (function() {
-            var figure = document.getElementById('catFigure');
-            if (!figure) return;
-            var companion = document.getElementById('catCompanion');
-            var bubble = document.getElementById('catBubble');
-            var hideBtn = document.getElementById('catHideBtn');
-            var restoreBtn = document.getElementById('catRestoreBtn');
-            var pupilL = document.getElementById('pupilL');
-            var pupilR = document.getElementById('pupilR');
-            var baseL = { x: 49, y: 50 },
-                baseR = { x: 71, y: 50 };
-            var maxOffset = 2.6;
-
-            var messages = [
-                'Meow-nitoring your uptime 🐾',
-                'ETL? More like meow-TL.',
-                'Purr-fect pipeline today.',
-                'I chased a byte earlier.',
-                'Nine lives, zero downtime.',
-                'Scroll gently, I might be napping.',
-                'Hiss-terically fast queries.',
-                'Paws for a coffee break?',
-                'Did someone say cat-alog? 📚',
-                'My tail has better throughput than your WiFi.',
-                'Pro tip: pet the cat, deploy with confidence.',
-                'I sits. I fits. I pipelines. 🐈',
-                'Bug? Never heard of it. I only catch mice.',
-                'That query plan looks claw-some!',
-                'Stretch break! Even senior cats need one. 🧘',
-                'Knocked a NULL value off the table earlier.',
-                'Rub my belly for 99.9% uptime.',
-                'Mew.exe has stopped responding… just kidding 😼'
-            ];
-            var ambientMessages = [
-                'Just counting rows over here… 🐟',
-                'I approve of this pipeline. ✅',
-                'That latency looks purr-etty good.',
-                'Whisker-based monitoring: all green.',
-                'Quiet shift. Too quiet… 🐭',
-                'Dreaming of infinite treats and zero pager alerts.'
-            ];
-
-            function trick() {
-                figure.classList.remove('pounce');
-                void figure.offsetWidth;
-                figure.classList.add('pounce');
-            }
-            var bubbleTimer = null;
-
-            function speak(text) {
-                bubble.textContent = text;
-                bubble.classList.add('show');
-                clearTimeout(bubbleTimer);
-                bubbleTimer = setTimeout(function() { bubble.classList.remove('show'); }, 2200);
-            }
-
-            function updateGaze(clientX, clientY) {
-                var rect = figure.getBoundingClientRect();
-                var cx = rect.left + rect.width / 2;
-                var cy = rect.top + rect.height / 2;
-                var dx = clientX - cx,
-                    dy = clientY - cy;
-                var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                var ox = (dx / dist) * maxOffset;
-                var oy = (dy / dist) * maxOffset;
-                pupilL.setAttribute('cx', baseL.x + ox);
-                pupilL.setAttribute('cy', baseL.y + oy);
-                pupilR.setAttribute('cx', baseR.x + ox);
-                pupilR.setAttribute('cy', baseR.y + oy);
-                var tiltRX = Math.max(-12, Math.min(12, -dy / 42));
-                var tiltRY = Math.max(-16, Math.min(16, dx / 42));
-                var catSvg = document.getElementById('catSvg');
-                if (catSvg) catSvg.style.transform = 'rotateX(' + tiltRX.toFixed(1) + 'deg) rotateY(' + tiltRY
-                    .toFixed(1) + 'deg)';
-            }
-
-            function resetGaze() {
-                pupilL.setAttribute('cx', baseL.x);
-                pupilL.setAttribute('cy', baseL.y);
-                pupilR.setAttribute('cx', baseR.x);
-                pupilR.setAttribute('cy', baseR.y);
-                var catSvg = document.getElementById('catSvg');
-                if (catSvg) catSvg.style.transform = '';
-            }
-            document.addEventListener('mousemove', function(e) { updateGaze(e.clientX, e.clientY); }, { passive: true });
-            document.addEventListener('touchmove', function(e) {
-                if (e.touches && e.touches[0]) updateGaze(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
-            document.documentElement.addEventListener('mouseleave', resetGaze);
-            document.addEventListener('touchend', resetGaze, { passive: true });
-
-            var scrollTimer = null;
-            window.addEventListener('scroll', function() {
-                figure.classList.add('scrolling');
-                clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(function() { figure.classList.remove('scrolling'); }, 500);
-            }, { passive: true });
-
-            figure.addEventListener('mouseenter', function() { figure.classList.add('notice'); });
-            figure.addEventListener('mouseleave', function() { figure.classList.remove('notice'); });
-
-            figure.addEventListener('click', function() {
-                trick();
-                speak(messages[Math.floor(Math.random() * messages.length)]);
-            });
-
-            figure.addEventListener('dblclick', function() {
-                figure.classList.remove('spin');
-                void figure.offsetWidth;
-                figure.classList.add('spin');
-                speak('Wheee! Full 360! 🌀');
-            });
-
-            figure.addEventListener('mousedown', function() {
-                figure.classList.add('purr');
-                speak('Purrr… keep petting 🤍');
-            });
-            window.addEventListener('mouseup', function() { figure.classList.remove('purr'); });
-            figure.addEventListener('touchstart', function(e) {
-                if (e.touches.length > 1) {
-                    e.preventDefault();
-                    figure.classList.remove('spin');
-                    void figure.offsetWidth;
-                    figure.classList.add('spin');
-                    speak('Wheee! Full 360! 🌀');
-                }
-            }, { passive: false });
-
-            document.addEventListener('keydown', function(e) {
-                if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || '')) return;
-                if (e.key === 'c' || e.key === 'C') { trick();
-                    speak('Meow! You found the secret key 🐾'); }
-            });
-
-            try {
-                new MutationObserver(function(muts) {
-                    muts.forEach(function(m) {
-                        if (m.attributeName !== 'data-theme') return;
-                        var t = document.documentElement.getAttribute('data-theme');
-                        figure.classList.remove('spin');
-                        void figure.offsetWidth;
-                        figure.classList.add('spin');
-                        speak(t === 'light' ? 'Ooh, bright mode! Where are my shades? 😎' :
-                            'Ahh, back to the dark side. Cozy. 🌙');
-                    });
-                }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-            } catch (e) {}
-
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) speak('Welcome back! I kept your seat warm. 🐾');
-            });
-
-            (function ambient() {
-                var delay = 22000 + Math.random() * 20000;
-                setTimeout(function() {
-                    if (!document.hidden && !bubble.classList.contains('show')) {
-                        speak(ambientMessages[Math.floor(Math.random() * ambientMessages.length)]);
-                        figure.classList.add('notice');
-                        setTimeout(function() { figure.classList.remove('notice'); }, 1600);
-                    }
-                    ambient();
-                }, delay);
-            })();
-
-            function scheduleBlink() {
-                var delay = 2600 + Math.random() * 3200;
-                setTimeout(function() {
-                    figure.classList.add('blink');
-                    setTimeout(function() {
-                        figure.classList.remove('blink');
-                        scheduleBlink();
-                    }, 140);
-                }, delay);
-            }
-            scheduleBlink();
-
-            figure.addEventListener('animationend', function(e) {
-                if (e.animationName === 'catSpin') {
-                    figure.classList.remove('spin');
-                }
-            });
-
-            function applyVisibility(hidden) {
-                companion.classList.toggle('hidden', hidden);
-                restoreBtn.classList.toggle('show', hidden);
-                try { localStorage.setItem('sonu-cat-hidden', hidden ? '1' : '0'); } catch (e) {}
-            }
-            var savedHidden = false;
-            try { savedHidden = localStorage.getItem('sonu-cat-hidden') === '1'; } catch (e) {}
-            applyVisibility(savedHidden);
-            hideBtn.addEventListener('click', function(e) { e.stopPropagation();
-                applyVisibility(true); });
-            restoreBtn.addEventListener('click', function() { applyVisibility(false);
-                speak('Hi again! 🐾'); });
-        })();
-    
+        
     </script>
+    <script src="assets/cat.js" defer></script>
 </body>
 </html>
