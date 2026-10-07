@@ -16,7 +16,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sonuansari.online">
     <meta property="og:title" content="Sonu Ansari | Senior AWS Data Engineer">
-    <meta property="og:description" content="Senior AWS Data Engineer — Redshift, Kinesis, Glue, Lambda, Step Functions, PySpark. 80% cost reduction, 1K+ vehicles tracked, <30s streaming latency.">
+    <meta property="og:description" content="Senior AWS Data Engineer — Redshift, Kinesis, Glue, Lambda, Step Functions, PySpark. 80% cost reduction, 1K+ vehicles tracked, &lt;30s streaming latency.">
     <meta property="og:image" content="https://sonuansari.online/logo.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Sonu Ansari | Senior AWS Data Engineer">
@@ -26,6 +26,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/cat.css">
 
     <!-- JSON-LD: Person -->
     <script type="application/ld+json">
@@ -71,7 +72,7 @@
             } catch (e) {}
         })();
     </script>
-<base target="_blank">
+<script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.__siteReady)document.documentElement.classList.add("show-all")},3000);</script>
 </head>
 <body>
 
@@ -510,7 +511,7 @@
                     <div class="etl-stat"><strong id="etlEvents">0</strong><span>Events read</span></div>
                     <div class="etl-stat"><strong id="etlValid">0</strong><span>Users validated</span></div>
                     <div class="etl-stat"><strong id="etlRows">0</strong><span>Gold report rows</span></div>
-                    <div class="etl-stat"><strong id="etlLatency">,</strong><span>Pipeline status</span></div>
+                    <div class="etl-stat"><strong id="etlLatency">—</strong><span>Pipeline status</span></div>
                 </div>
                 <div class="etl-note"><strong>Why this is production-grade ETL:</strong> subscription eligibility is applied before expensive processing; Kinesis handles high-throughput ingest; Lambda parses and validates; Glue/Spark builds reusable metrics; Step Functions coordinates the fault-tolerant monthly workflow; and S3 Bronze/Silver/Gold layers separate raw, trusted, and business-ready data — with the Gold layer feeding insights and personalized email delivery.</div>
             </div>
@@ -592,5 +593,6 @@
     </footer>
 
     <script src="assets/main.js"></script>
+    <script src="assets/cat.js" defer></script>
 </body>
 </html>
