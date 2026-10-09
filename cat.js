@@ -1,4 +1,4 @@
-/* Byte: site cat + chat assistant. Shared by index.html and extras.html.
+/* Byte: site cat + chat assistant. Shared by index.html and playground.html.
    Works offline with a built-in knowledge base about Sonu's portfolio.
    Optional: set window.CAT_CHAT_ENDPOINT = 'https://your-proxy/chat' before this script to use an LLM backend
    (POST {messages:[{role,content}]} -> {reply:"..."}). Never put an API key in this file. */
@@ -6,7 +6,7 @@
     'use strict';
     if (document.getElementById('catCompanion')) return;
 
-    var home = /extras(\.html)?$/.test(location.pathname) ? 'index.html' : '';
+    var home = /playground(\.html)?\/?$/.test(location.pathname) ? '/' : '';
     var EMAIL = 'connect' + '@' + 'sonuansari.online';
     var ENDPOINT = window.CAT_CHAT_ENDPOINT || '';
     function sec(id, t) { return { t: t, u: home + '#' + id }; }
@@ -15,7 +15,7 @@
         book: { t: '📅 Book a call', u: 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ3SSPTnM99GQ-qHaMng7_WTDEX9zCxA7T5n1lDGaLJT6KxJD5yme-SLR2Ju6cWaqbeO97OZzmAi?gv=true' },
         linkedin: { t: 'LinkedIn', u: 'https://www.linkedin.com/in/sonu-ansari-88927120a' },
         github: { t: 'GitHub', u: 'https://github.com/Sonu-Ansari-Dev' },
-        play: { t: '🐾 Playground', u: 'extras.html' }
+        play: { t: '🐾 Playground', u: '/playground' }
     };
     var DEFAULT_CHIPS = ['Experience', 'Skills', 'Streaming project', 'Cost savings', 'Contact'];
 
