@@ -1,0 +1,2758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Playground — Sonu Ansari | Robotics, Geofencing & GPS Demos</title>
+    <meta name="description" content="Interactive engineering demos by Sonu Ansari — shortest-path routing, line-follower control loops, live geofencing, and GPS road matching.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="canonical" href="https://sonuansari.online/playground">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sonuansari.online/playground">
+    <meta property="og:title" content="Playground | Sonu Ansari">
+    <meta property="og:description" content="Interactive demos by Sonu Ansari: A*/Dijkstra pathfinding, PID line-follower, live geofencing and GPS road matching.">
+    <meta property="og:image" content="https://sonuansari.online/logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=20261009">
+    <link rel="stylesheet" href="cat.css?v=20261009">
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --bg: #0a0a0f;
+            --bg-elevated: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #1e1e2d;
+            --text: #e8e8f0;
+            --text-muted: #8a8aa3;
+            --text-dim: #5a5a75;
+            --accent: #00d4aa;
+            --accent-dim: rgba(0, 212, 170, 0.2);
+            --accent-glow: rgba(0, 212, 170, 0.13);
+            --accent-secondary: #00a8e8;
+            --accent-tertiary: #7c3aed;
+            --border: #252535;
+            --border-light: #333344;
+            --g1: #00d4aa;
+            --g2: #00a8e8;
+            --g3: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --pf-cell: #101019;
+            --pf-obstacle: #2b2b3c;
+            --pf-grid: rgba(255, 255, 255, .07);
+            --pf-visited: rgba(0, 212, 170, .16);
+            --pf-pathfill: rgba(0, 212, 170, .32);
+            --pf-path: #00d4aa;
+            --pf-start: #00a8e8;
+            --pf-goal: #f59e0b;
+            --cat-eye: #ffffff;
+            --cat-pupil: #101828;
+            --cat-mouth: #0a0a0f;
+            color-scheme: dark;
+        }
+        html[data-theme="light"] {
+            --bg: #f5f7fb;
+            --bg-elevated: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8fafc;
+            --text: #101828;
+            --text-muted: #475467;
+            --text-dim: #667085;
+            --accent: #008f78;
+            --accent-dim: rgba(0, 143, 120, 0.16);
+            --accent-glow: rgba(0, 143, 120, 0.10);
+            --accent-secondary: #0878a8;
+            --accent-tertiary: #6941c6;
+            --border: #d9dee8;
+            --border-light: #c6cedb;
+            --g1: #008f78;
+            --g2: #0878a8;
+            --g3: #6941c6;
+            --success: #0b8f5b;
+            --warning: #c77700;
+            --pf-cell: #eef1f7;
+            --pf-obstacle: #c3cbda;
+            --pf-grid: rgba(16, 24, 40, .12);
+            --pf-visited: rgba(0, 143, 120, .20);
+            --pf-pathfill: rgba(0, 143, 120, .34);
+            --pf-path: #008f78;
+            --pf-start: #0878a8;
+            --pf-goal: #c77700;
+            --cat-eye: #ffffff;
+            --cat-pupil: #101828;
+            --cat-mouth: #101828;
+            color-scheme: light;
+        }
+        html[data-theme="light"] body { background: var(--bg); }
+
+        /* ===== RESET ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color .45s ease, color .45s ease;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        ::selection { background: var(--accent-dim); color: var(--accent); }
+        img, svg, canvas { max-width: 100%; }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: color-mix(in srgb, var(--bg) 86%, transparent);
+            backdrop-filter: blur(20px) saturate(1.2);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        nav.scrolled {
+            background: color-mix(in srgb, var(--bg) 94%, transparent);
+            box-shadow: 0 4px 30px rgba(0,0,0,.16);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 42px;
+        }
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex: 0 0 auto;
+        }
+        .nav-logo img {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 16px rgba(0,168,232,0.16);
+            flex-shrink: 0;
+        }
+        .nav-logo .nav-logo-dot { color: var(--accent); }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            margin-left: auto;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--g1), var(--g2));
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 42px; height: 42px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-card);
+            color: var(--text);
+            align-items: center;
+            justify-content: center;
+            transition: border-color .25s ease, background .25s ease, transform .25s ease;
+            cursor: pointer;
+        }
+        .mobile-menu-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .menu-icon {
+            width: 19px; height: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .menu-icon span {
+            display: block;
+            width: 100%; height: 2px;
+            border-radius: 2px;
+            background: currentColor;
+            transition: transform .3s ease, opacity .2s ease;
+            transform-origin: center;
+        }
+        .mobile-menu-btn.active .menu-icon span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .mobile-menu-btn.active .menu-icon span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .mobile-menu-btn.active .menu-icon span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        @media (max-width: 1180px) {
+            .mobile-menu-btn { display: inline-flex; }
+            .nav-links {
+                position: absolute;
+                top: calc(100% + .6rem);
+                left: 0; right: 0;
+                z-index: 20;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: .55rem;
+                background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                box-shadow: 0 18px 50px rgba(0,0,0,.18);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transform: translateY(-8px) scale(.98);
+                transform-origin: top right;
+                transition: opacity .25s ease, transform .25s ease, visibility .25s ease;
+            }
+            .nav-links.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1); }
+            .nav-links li { width: 100%; }
+            .nav-links a { display: block; padding: .8rem .85rem; border-radius: 9px; font-size: .9rem; }
+            .nav-links a:hover { background: var(--accent-glow); }
+            .nav-links a::after { display: none; }
+        }
+
+        /* ===== THEME TOGGLE ===== */
+        .theme-toggle {
+            position: relative;
+            width: 48px; height: 28px;
+            flex: 0 0 auto;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+            transition: border-color .3s ease, background .3s ease, transform .2s ease;
+        }
+        .theme-toggle:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .theme-toggle-track {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px;
+            font-size: 12px;
+            opacity: .72;
+        }
+        .theme-toggle-thumb {
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--text);
+            color: var(--bg);
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+            transition: transform .4s cubic-bezier(.2,.8,.2,1), background .4s ease, color .4s ease;
+        }
+        html[data-theme="light"] .theme-toggle-thumb { transform: translateX(20px); }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 8rem 2rem 4rem;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(0,212,170,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(124,58,237,0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+        .hero-badge .dot {
+            width: 6px; height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s ease infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.2)} }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--g1), var(--g2), var(--g3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.35rem);
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease 0.4s both;
+        }
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+            animation: fadeInUp 0.6s ease 0.5s both;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.6s both;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--g1), var(--g2));
+            color: var(--bg);
+            box-shadow: 0 4px 20px rgba(0,212,170,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,170,0.4); }
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border-light);
+        }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        .btn-outline:hover { background: var(--accent-glow); transform: translateY(-2px); }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease 0.7s both;
+            flex-wrap: wrap;
+        }
+        .stat-item { text-align: center; }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.25rem;
+        }
+
+        /* ===== SECTIONS ===== */
+        section { padding: 6rem 2rem; }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-header {
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .section-header h2 { font-size: 1.75rem; font-weight: 800; color: var(--text); }
+        .section-header .line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+            max-width: 300px;
+        }
+        .section-header .num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* ===== ABOUT ===== */
+        #about { background: var(--bg-elevated); }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            align-items: start;
+        }
+        .about-left { position: relative; }
+        .about-avatar {
+            width: 220px; height: 220px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--g1), var(--g2), var(--g3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            font-weight: 800;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            animation: float 6s ease-in-out infinite;
+        }
+        .about-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: var(--bg-card);
+            border-radius: 17px;
+        }
+        .about-avatar span { position: relative; z-index: 1; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .about-info {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .info-row svg {
+            width: 18px; height: 18px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .info-row a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+            word-break: break-all;
+        }
+        .info-row a:hover { color: var(--accent); }
+        .about-right p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        .about-right p strong { color: var(--text); font-weight: 600; }
+
+        /* ===== EXPERIENCE CAROUSEL ===== */
+        #experience { position: relative; }
+        .exp-carousel { position: relative; overflow: hidden; }
+        .exp-track {
+            display: flex;
+            width: calc(var(--slide-count, 5) * 100%);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            align-items: stretch;
+        }
+        .exp-slide {
+            width: calc(100% / var(--slide-count, 5));
+            flex: 0 0 calc(100% / var(--slide-count, 5));
+            padding: 4px;
+        }
+        .exp-slide-inner {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .exp-slide-inner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--g1), var(--g2), var(--g3));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+        .exp-slide-inner:hover::before { transform: scaleX(1); }
+        .exp-slide-inner:hover {
+            border-color: var(--border-light);
+            background: var(--bg-card-hover);
+        }
+        .exp-slide-header { margin-bottom: 1.25rem; }
+        .exp-slide-role {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+            margin: 0 0 0.25rem 0;
+        }
+        .company-link {
+            margin-left: .5rem;
+            font-size: .72rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            text-decoration: none;
+            white-space: nowrap;
+            border-bottom: 1px dashed currentColor;
+            transition: opacity .2s ease, color .2s ease;
+        }
+        .company-link:hover { color: var(--accent-secondary); opacity: .9; }
+        .exp-slide-company {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 0 0 0.75rem 0;
+        }
+        .exp-slide-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .exp-slide-meta-item {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .exp-slide-meta-item svg {
+            width: 14px; height: 14px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .exp-slide-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .exp-slide-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .exp-slide-tag.current {
+            background: rgba(16,185,129,0.15);
+            border-color: rgba(16,185,129,0.3);
+            color: var(--success);
+        }
+        .exp-slide-desc {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .exp-slide-achievements {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .exp-slide-achievement {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+        .exp-slide-ach-icon {
+            width: 20px; height: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .exp-slide-ach-text { flex: 1; }
+        .exp-slide-ach-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.4;
+            margin: 0 0 0.15rem 0;
+        }
+        .exp-slide-ach-detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+        .exp-slide-ach-highlight { font-weight: 600; color: var(--text); }
+        .exp-slide-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .exp-slide-metric {
+            text-align: center;
+            padding: 1.25rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            transition: all 0.3s ease;
+        }
+        .exp-slide-metric:hover { border-color: var(--border-light); transform: translateY(-2px); }
+        .exp-slide-metric-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.1;
+            margin: 0 0 0.35rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .exp-slide-metric-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 0;
+        }
+        .exp-slide-metric.accent .exp-slide-metric-value { color: var(--accent-secondary); }
+        .exp-slide-metric.positive .exp-slide-metric-value { color: var(--accent); }
+        .exp-slide-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 1.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .exp-slide-card-title svg {
+            width: 20px; height: 20px;
+            color: var(--accent);
+        }
+
+        .exp-slide-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .exp-slide-nav-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .exp-slide-nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        .exp-slide-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .exp-slide-nav-btn svg { width: 18px; height: 18px; }
+        .exp-slide-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .exp-slide-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+        .exp-slide-dot.active {
+            background: var(--accent);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 640px) {
+            .exp-slide-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .exp-slide-inner { padding: 1.25rem; }
+            .exp-slide-role { font-size: 1.1rem; }
+            .exp-slide-metric-value { font-size: 1.4rem; }
+        }
+
+        /* ===== SKILLS ===== */
+        #skills { background: var(--bg-elevated); }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .skill-category {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .skill-category:hover { border-color: var(--border-light); transform: translateY(-2px); }
+        .skill-cat-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .skill-tag {
+            padding: 0.4rem 0.9rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .skill-tag:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+        /* ===== PROJECTS ===== */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .project-card::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .project-card:hover { border-color: var(--border-light); transform: translateY(-4px); box-shadow: 0 15px 50px rgba(0,0,0,0.3); }
+        .project-card:hover::after { opacity: 1; }
+        .project-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent-dim), rgba(0,168,232,0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.6rem;
+            border: 1px solid var(--accent-dim);
+        }
+        .project-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        .project-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+        .project-features {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+        .project-features li {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .project-features li::before { content: '→'; color: var(--accent); font-weight: 700; }
+        .project-metrics {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: auto;
+        }
+        .project-metric {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        .project-metric strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 1rem;
+        }
+        .project-tag {
+            padding: 0.25rem 0.7rem;
+            background: var(--bg);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--border);
+        }
+        .project-links {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .project-link:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        .project-card.featured {
+            border-color: var(--accent-dim);
+            background: linear-gradient(135deg, var(--bg-card), rgba(0,212,170,0.03));
+        }
+        .project-card.featured .project-icon {
+            background: linear-gradient(135deg, var(--accent-dim), rgba(124,58,237,0.2));
+            animation: iconGlow 3s ease infinite;
+        }
+        @keyframes iconGlow { 0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0.2)} 50%{box-shadow:0 0 20px 5px rgba(0,212,170,0.1)} }
+        .featured-badge {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            padding: 0.25rem 0.6rem;
+            background: linear-gradient(135deg, var(--g1), var(--g2));
+            color: var(--bg);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 100px;
+        }
+
+        /* ===== SHOWCASE (shared) ===== */
+        #showcase { background: var(--bg-elevated); }
+        .showcase-intro {
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: -1.5rem 0 2.5rem;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .showcase-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+        .showcase-card:hover { border-color: var(--border-light); }
+        .showcase-card-wide { grid-column: 1 / -1; }
+        .showcase-card-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+        .showcase-card-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .showcase-canvas-wrap {
+            position: relative;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .showcase-canvas-wrap canvas,
+        .showcase-canvas-wrap svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .showcase-legend {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            margin-top: 0.85rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        .showcase-legend .dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 0.35rem;
+            vertical-align: middle;
+        }
+        .showcase-legend .dot.start { background: var(--accent-secondary); }
+        .showcase-legend .dot.goal { background: var(--warning); }
+        .showcase-legend .dot.visited { background: rgba(0,212,170,0.35); }
+        .showcase-legend .dot.path { background: var(--accent); }
+
+        .demo-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.9rem;
+        }
+        .demo-btn {
+            padding: 0.45rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-muted);
+            font: 600 0.75rem/1 inherit;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        .demo-btn:hover, .demo-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        .demo-readout {
+            margin-left: auto;
+            font: 600 0.72rem/1 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+        }
+
+        /* Line Follower */
+        .lf-dashboard {
+            display: grid;
+            grid-template-columns: 1.5fr .85fr;
+            gap: 1rem;
+        }
+        .lf-panel {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem;
+        }
+        .lf-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: .65rem;
+        }
+        .lf-metric {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .7rem;
+        }
+        .lf-metric-value {
+            font: 700 1rem/1 'JetBrains Mono', monospace;
+            color: var(--accent);
+        }
+        .lf-metric-label {
+            margin-top: .3rem;
+            font-size: .65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .control-row {
+            display: grid;
+            grid-template-columns: 34px 1fr 48px;
+            gap: .5rem;
+            align-items: center;
+            margin-top: .7rem;
+            font: 600 .7rem/1 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+        }
+        .control-row input { width: 100%; accent-color: var(--accent); }
+        .lf-robot-body { fill: var(--accent); }
+        .lf-sensor { transition: fill 0.15s ease; fill: var(--accent-secondary); }
+        .lf-sensor.active { fill: var(--warning); }
+
+        /* Geofence */
+        .showcase-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .shape-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .shape-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .shape-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+        .ngon-slider-wrap {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .ngon-slider-wrap.active { display: flex; }
+        .ngon-slider-wrap input[type="range"] { accent-color: var(--accent); width: 120px; }
+        .geofence-alert {
+            position: absolute;
+            top: 0.75rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #f87171;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.4rem 0.9rem;
+            border-radius: 100px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .geofence-alert.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Map Match */
+        .mapmatch-layout {
+            display: grid;
+            grid-template-columns: 1.45fr .8fr;
+            gap: 1rem;
+        }
+        .map-canvas {
+            position: relative;
+            min-height: 300px;
+            background: linear-gradient(145deg, rgba(0,168,232,.06), rgba(124,58,237,.04)), var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .map-canvas svg { width: 100%; height: 300px; display: block; }
+        .map-legend {
+            position: absolute;
+            left: .75rem; bottom: .7rem;
+            display: flex;
+            gap: .8rem;
+            flex-wrap: wrap;
+            font-size: .68rem;
+            color: var(--text-dim);
+            background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+            padding: .45rem .6rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .legend-line {
+            display: inline-block;
+            width: 18px; height: 3px;
+            vertical-align: middle;
+            margin-right: .3rem;
+            border-radius: 4px;
+            background: var(--warning);
+        }
+        .legend-line.corrected { background: var(--accent); }
+        #roadBase { stroke: var(--border-light) !important; }
+        #roadCenter { stroke: var(--text-dim) !important; }
+        #mapVehicle { stroke: var(--bg) !important; }
+        .map-api-list {
+            display: flex;
+            flex-direction: column;
+            gap: .65rem;
+        }
+        .api-step {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .8rem;
+            background: var(--bg);
+        }
+        .api-step strong { display: block; color: var(--text); font-size: .78rem; }
+        .api-step span { display: block; margin-top: .25rem; color: var(--text-dim); font-size: .7rem; line-height: 1.5; }
+        .api-chip {
+            display: inline-block;
+            margin-top: .45rem;
+            padding: .18rem .45rem;
+            border-radius: 5px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid var(--accent-dim);
+            font: 600 .62rem/1 'JetBrains Mono', monospace;
+        }
+
+        /* ETL */
+        .etl-cohort {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .65rem;
+            margin: .9rem 0 1rem;
+        }
+        .etl-cohort-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: .75rem .8rem;
+            background: linear-gradient(135deg, rgba(255,255,255,.025), rgba(0,212,170,.025));
+        }
+        .etl-cohort-card span {
+            display: block;
+            font-size: .62rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        .etl-cohort-card strong {
+            display: block;
+            margin-top: .25rem;
+            font: 700 1.15rem/1.1 'JetBrains Mono', monospace;
+            color: var(--accent);
+        }
+        .etl-cohort-card small {
+            display: block;
+            margin-top: .25rem;
+            color: var(--text-muted);
+            font-size: .62rem;
+        }
+        .etl-report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .75rem;
+            margin-top: .9rem;
+        }
+        .etl-report-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            background: var(--bg);
+        }
+        .etl-report-label {
+            display: block;
+            font: 700 .58rem/1 'JetBrains Mono', monospace;
+            letter-spacing: .1em;
+            color: var(--text-dim);
+            margin-bottom: .8rem;
+        }
+        .etl-report-user {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            padding-bottom: .7rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .etl-avatar {
+            width: 34px; height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font: 700 .68rem 'JetBrains Mono', monospace;
+        }
+        .etl-report-user strong, .etl-badge strong {
+            display: block;
+            color: var(--text);
+            font-size: .75rem;
+        }
+        .etl-report-user small, .etl-badge small {
+            display: block;
+            margin-top: .18rem;
+            color: var(--text-dim);
+            font-size: .61rem;
+        }
+        .etl-metric-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: .7rem;
+            align-items: center;
+            padding: .55rem 0;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            font-size: .68rem;
+        }
+        .etl-metric-row:last-child { border-bottom: 0; }
+        .etl-metric-row strong {
+            font: 700 .75rem 'JetBrains Mono', monospace;
+            color: var(--text);
+        }
+        .etl-metric-row i { font-style: normal; font-size: .58rem; color: var(--accent); }
+        .etl-badge {
+            display: flex;
+            gap: .65rem;
+            align-items: flex-start;
+            padding: .55rem 0;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+        }
+        .etl-badge:last-child { border-bottom: 0; }
+        .etl-badge > span { font-size: 1.15rem; }
+        .etl-flow {
+            position: relative;
+            display: flex;
+            gap: .55rem;
+            align-items: stretch;
+            overflow-x: auto;
+            padding: .25rem .1rem .8rem;
+            scrollbar-width: thin;
+        }
+        .etl-node {
+            position: relative;
+            min-width: 92px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            padding: .85rem .6rem;
+            text-align: center;
+            transition: all .3s ease;
+        }
+        .etl-node.active { border-color: var(--accent); box-shadow: 0 0 24px var(--accent-glow); transform: translateY(-3px); }
+        .etl-node.done { border-color: rgba(0,212,170,.35); }
+        .etl-node-icon { font-size: 1.15rem; }
+        .etl-node-name { margin-top: .35rem; font-size: .7rem; font-weight: 700; color: var(--text); }
+        .etl-node-sub { margin-top: .2rem; font-size: .58rem; color: var(--text-dim); line-height: 1.35; }
+        .etl-arrow {
+            flex: 0 0 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font: 700 1rem/1 'JetBrains Mono', monospace;
+        }
+        .etl-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .65rem;
+            margin-top: .9rem;
+        }
+        .etl-stat {
+            padding: .75rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg);
+        }
+        .etl-stat strong {
+            display: block;
+            font: 700 .95rem/1 'JetBrains Mono', monospace;
+            color: var(--accent);
+        }
+        .etl-stat span {
+            display: block;
+            margin-top: .3rem;
+            font-size: .62rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        .etl-note {
+            margin-top: .8rem;
+            padding: .7rem .85rem;
+            border-left: 2px solid var(--accent);
+            background: var(--accent-glow);
+            color: var(--text-muted);
+            font-size: .75rem;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 760px) {
+            .etl-cohort { grid-template-columns: repeat(2, 1fr); }
+            .etl-report-grid { grid-template-columns: 1fr; }
+            .lf-dashboard, .mapmatch-layout { grid-template-columns: 1fr; }
+            .demo-readout { margin-left: 0; width: 100%; }
+            .etl-stats { grid-template-columns: repeat(2, 1fr); }
+            .showcase-grid, .project-grid, .skills-grid, .cert-grid { grid-template-columns: 1fr; }
+            .showcase-card-wide { grid-column: auto; }
+            .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .about-avatar { width: 160px; height: 160px; font-size: 3.5rem; }
+            .stats-bar { gap: 1.5rem; }
+            .stat-value { font-size: 1.5rem; }
+            section { padding: 4rem 1rem; }
+            .hero { padding: 6.5rem 1rem 3rem; min-height: 100svh; }
+            .contact-box { padding: 2rem 1.15rem; }
+            .contact-links { flex-direction: column; }
+            .contact-link { justify-content: center; width: 100%; }
+        }
+
+        /* ===== CERTIFICATIONS ===== */
+        #certifications { background: var(--bg-elevated); }
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .cert-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+        }
+        .cert-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .cert-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--g1), var(--g2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .cert-info h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+        .cert-info p { font-size: 0.8rem; color: var(--text-dim); }
+
+        /* ===== EDUCATION ===== */
+        .edu-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            max-width: 600px;
+        }
+        .edu-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: var(--accent-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .edu-info h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+        .edu-info p { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* ===== RECOGNITION ===== */
+        #recognition { background: var(--bg-elevated); }
+        .recog-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 700px;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .recog-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .recog-info h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+        .recog-info p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+        /* ===== TESTIMONIALS ===== */
+        #testimonials { background: var(--bg-elevated); }
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .testimonial-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+        .testimonial-card .quote {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-style: italic;
+            margin-bottom: 0.75rem;
+        }
+        .testimonial-card .author {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .testimonial-card .role {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* ===== BLOG / ARTICLES ===== */
+        #blog { background: var(--bg); }
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .blog-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .blog-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .blog-card .blog-tag {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .blog-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+        .blog-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .blog-card .blog-meta {
+            display: block;
+            margin-top: 0.75rem;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ===== CONTACT ===== */
+        #contact { text-align: center; }
+        .contact-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .contact-box h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; position: relative; }
+        .contact-box p { color: var(--text-muted); margin-bottom: 2rem; position: relative; }
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .contact-link:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        .schedule-btn-wrap { display: inline-flex; align-items: center; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+        footer a { color: var(--text-muted); text-decoration: none; }
+        footer a:hover { color: var(--accent); }
+        footer .footer-social {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        footer .footer-social a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+        footer .footer-social a:hover { color: var(--accent); }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .js .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+.js .reveal.visible, .js.show-all .reveal { opacity: 1; transform: translateY(0); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ===== PARTICLE CANVAS ===== */
+        #particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ===== SCROLL TO TOP ===== */
+        .scroll-top {
+            position: fixed;
+            bottom: 7.5rem;
+            right: 1.25rem;
+            z-index: 500;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .scroll-top.show { display: flex; }
+        .scroll-top:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); transform: translateY(-2px); }
+
+        /* ===== SHOWCASE MOBILE FIT ===== */
+        #showcase svg, #showcase canvas { max-width: 100%; }
+        #lineFollowerSvg { width: 100%; height: auto; display: block; }
+        .lf-panel { overflow: hidden; }
+
+        @media (max-width: 640px) {
+            html { overflow-x: hidden; }
+            .map-canvas svg { height: 220px; }
+            .etl-flow { flex-wrap: wrap; overflow-x: visible; gap: .5rem; padding-bottom: .25rem; }
+            .etl-arrow { display: none; }
+            .etl-node { min-width: 0; flex: 1 1 calc(50% - .25rem); }
+            .demo-toolbar { gap: .4rem; }
+            .demo-btn { padding: .4rem .65rem; }
+        }
+
+        /* ===== RESPONSIVE OVERRIDES ===== */
+        .brand-image {
+            width: 280px; height: 155px;
+            padding: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 20px 60px rgba(0,168,232,0.15);
+        }
+        .brand-image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 18px; }
+
+        @media (max-width: 700px) {
+            .brand-image { width: min(280px, 90vw); height: auto; aspect-ratio: 280/155; }
+            .about-left { display: flex; flex-direction: column; align-items: center; }
+            .about-info { width: 100%; max-width: 360px; }
+            .stats-bar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem .75rem; margin-top: 2.5rem; }
+            .section-header .line { flex-basis: 100%; max-width: none; }
+            .section-header h2 { font-size: 1.45rem; }
+            .hero-cta .btn { width: 100%; justify-content: center; }
+        }
+
+        @media (max-width: 420px) {
+            nav { padding-inline: .75rem; }
+            .nav-logo { font-size: 1rem; }
+            .theme-toggle { width: 44px; height: 26px; }
+            .theme-toggle-thumb { width: 18px; height: 18px; top: 3px; left: 3px; }
+            html[data-theme="light"] .theme-toggle-thumb { transform: translateX(18px); }
+            .nav-actions { gap: .4rem; }
+            .hero h1 { font-size: clamp(2.2rem, 12vw, 3rem); }
+            .stat-value { font-size: 1.3rem; }
+            .stat-label { font-size: .62rem; }
+            .exp-slide-metrics-grid { grid-template-columns: 1fr 1fr; gap: .55rem; }
+            .exp-slide-inner { padding: 1rem; }
+            .etl-cohort, .etl-stats { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+    <script>
+        (function() {
+            try {
+                var t = localStorage.getItem('sonu-theme');
+                if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        })();
+    </script>
+<link rel="stylesheet" href="responsive.css?v=20261009">
+    <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.__siteReady)document.documentElement.classList.add("show-all")},3000);</script>
+</head>
+<body>
+
+    <!-- Particle Background -->
+    <canvas id="particles"></canvas>
+
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">↑</button>
+
+
+
+    
+    <nav id="navbar">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo" aria-label="Back to profile">
+                <img src="logo.png" alt="Sonu Ansari logo">
+                <span>Sonu Ansari<span class="nav-logo-dot">.</span></span>
+            </a>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
+                    <span class="theme-toggle-track"><span>☀</span><span>☾</span></span>
+                    <span class="theme-toggle-thumb" id="themeToggleThumb">☾</span>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primaryNav">
+                    <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+                </button>
+            </div>
+            <ul class="nav-links" id="primaryNav">
+                <li><a href="/#roles">Target Roles</a></li>
+                <li><a href="/#experience">Experience</a></li>
+                <li><a href="/#skills">Skills</a></li>
+                <li><a href="/#demo">ETL Demo</a></li>
+                <li><a href="/#contact">Contact</a></li>
+                <li><a href="/" class="nav-extras">← Back to Profile</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ===== PLAYGROUND / SHOWCASE ===== -->
+    <section id="showcase">
+        <div class="section-inner">
+            <div class="section-header reveal">
+                <span class="num">🐾</span>
+                <h2>Engineering Playground</h2>
+                <div class="line"></div>
+            </div>
+            <p class="showcase-intro reveal">Interactive demos — robotics, control systems, geofencing, and GPS road-matching. The serious AWS data platform work lives on the <a href="/">main profile</a>; this is where the experiments play.</p>
+            <div class="showcase-grid">
+<!-- Pathfinding -->
+                <div class="showcase-card showcase-card-wide reveal">
+                    <div class="showcase-card-header">
+                        <h3>Shortest-Path Routing</h3>
+                        <p>Build obstacles, choose the algorithm, and watch the search frontier expand. This mirrors the core routing problem behind an autonomous transport robot.</p>
+                    </div>
+                    <div class="demo-toolbar path-toolbar">
+                        <div class="tb-left">
+                            <button class="demo-btn active path-algo-btn" data-algo="astar">A*</button>
+                            <button class="demo-btn path-algo-btn" data-algo="dijkstra">Dijkstra</button>
+                            <button class="demo-btn path-algo-btn" data-algo="bfs">BFS</button>
+                            <button class="demo-btn" id="pathRandom">Randomize</button>
+                            <button class="demo-btn" id="pathClear">Clear</button>
+                        </div>
+                        <div class="tb-right">
+                            <span class="demo-readout" id="pathStatus">Click cells to add/remove obstacles</span>
+                            <button class="run-btn" id="pathRun" type="button">▶ Run</button>
+                        </div>
+                    </div>
+                    <div class="showcase-canvas-wrap"><canvas id="pathfindCanvas" width="900" height="360"></canvas></div>
+                    <div class="showcase-legend">
+                        <span><i class="dot start"></i>Start</span><span><i class="dot goal"></i>Goal</span><span><i class="dot visited"></i>Explored</span><span><i class="dot path"></i>Shortest path</span>
+                    </div>
+                </div>
+
+                <!-- Line Follower -->
+                <div class="showcase-card showcase-card-wide reveal">
+                    <div class="showcase-card-header">
+                        <h3>Line-Follower Control Loop</h3>
+                        <p>A small PID-style feedback loop: sensors estimate lateral error, the controller adjusts motor speeds, and the robot converges back to the track.</p>
+                    </div>
+                    <div class="demo-toolbar">
+                        <button class="demo-btn active" id="lfStart">⏸ Pause</button>
+                        <button class="demo-btn" id="lfReset">Reset</button>
+                        <span class="demo-readout" id="lfStatus">PID feedback active</span>
+                    </div>
+                    <div class="lf-dashboard">
+                        <div class="lf-panel">
+                            <svg id="lineFollowerSvg" viewBox="0 0 640 300" width="640" height="300" aria-label="Interactive line follower simulation">
+                                <path id="trackPath" d="M35,245 C115,70 175,265 275,135 S 440,45 605,170" fill="none" stroke="#252535" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M35,245 C115,70 175,265 275,135 S 440,45 605,170" fill="none" stroke="#00d4aa" stroke-width="2" stroke-dasharray="6 8" opacity=".5"/>
+                                <g id="lfRobot"><rect class="lf-robot-body" x="-15" y="-9" width="30" height="18" rx="4"/><circle class="lf-sensor" id="lfSensorL" cx="-10" cy="10" r="3"/><circle class="lf-sensor" id="lfSensorR" cx="10" cy="10" r="3"/></g>
+                            </svg>
+                        </div>
+                        <div class="lf-panel">
+                            <div class="lf-metrics">
+                                <div class="lf-metric"><div class="lf-metric-value" id="lfError">0.00</div><div class="lf-metric-label">Lateral error</div></div>
+                                <div class="lf-metric"><div class="lf-metric-value" id="lfCorrection">0.00</div><div class="lf-metric-label">Correction</div></div>
+                                <div class="lf-metric"><div class="lf-metric-value" id="lfLeft">50%</div><div class="lf-metric-label">Left motor</div></div>
+                                <div class="lf-metric"><div class="lf-metric-value" id="lfRight">50%</div><div class="lf-metric-label">Right motor</div></div>
+                            </div>
+                            <div class="control-row"><span>Kp</span><input id="lfKp" type="range" min="0" max="3" step="0.05" value="1.2"><span id="lfKpV">1.20</span></div>
+                            <div class="control-row"><span>Ki</span><input id="lfKi" type="range" min="0" max="1" step="0.01" value="0.08"><span id="lfKiV">0.08</span></div>
+                            <div class="control-row"><span>Kd</span><input id="lfKd" type="range" min="0" max="2" step="0.05" value="0.45"><span id="lfKdV">0.45</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geofence -->
+                <div class="showcase-card showcase-card-wide reveal">
+                    <div class="showcase-card-header">
+                        <h3>Live Geofencing</h3>
+                        <p>Point-in-shape boundary detection for fleet tracking, switch the fence geometry and watch the vehicle trigger a live breach alert.</p>
+                    </div>
+                    <div class="showcase-controls">
+                        <button class="shape-btn active" data-shape="circle">Circle</button>
+                        <button class="shape-btn" data-shape="ngon">N-gon</button>
+                        <div class="ngon-slider-wrap" id="ngonSliderWrap"><input type="range" id="ngonSlider" min="3" max="12" value="5" aria-label="Number of fence sides"><span id="ngonSliderValue">5 sides</span></div>
+                    </div>
+                    <div class="showcase-canvas-wrap"><canvas id="geofenceCanvas" width="900" height="320"></canvas><div class="geofence-alert" id="geofenceAlert">⚠ Geofence breach detected</div></div>
+                </div>
+
+                <!-- GPS Correction -->
+                <div class="showcase-card showcase-card-wide reveal">
+                    <div class="showcase-card-header">
+                        <h3>GPS Correction &amp; Road Matching</h3>
+                        <p>Raw GPS from a moving vehicle can jump off the road because of signal noise, urban canyons, or multipath effects. In a production flow, Google Maps Platform can snap the noisy points to the road network before they are used for tracking, ETA, geofencing, or routing.</p>
+                    </div>
+                    <div class="demo-toolbar">
+                        <button class="demo-btn active" id="mapRawBtn">Raw GPS</button>
+                        <button class="demo-btn active" id="mapCorrectBtn">Road matched</button>
+                        <button class="demo-btn" id="mapRandomize">↻ Randomize road</button>
+                        <button class="demo-btn" id="mapAnimate">▶ Replay</button>
+                        <span class="demo-readout" id="mapStatus">Noisy GPS projected onto the visible road</span>
+                    </div>
+                    <div class="mapmatch-layout">
+                        <div class="map-canvas">
+                            <svg id="mapMatchSvg" viewBox="0 0 760 300" preserveAspectRatio="none">
+                                <path id="roadBase" d="M-20 230 C90 175 150 220 245 150 S405 45 505 120 S630 245 780 165" fill="none" stroke="#252535" stroke-width="34" stroke-linecap="round"/>
+                                <path id="roadCenter" d="M-20 230 C90 175 150 220 245 150 S405 45 505 120 S630 245 780 165" fill="none" stroke="#6b6b82" stroke-width="2" stroke-dasharray="8 8"/>
+                                <path id="correctedRoute" d="M-20 230 C90 175 150 220 245 150 S405 45 505 120 S630 245 780 165" fill="none" stroke="#00d4aa" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+                                <g id="rawPoints"></g><g id="correctedPoints"></g>
+                                <circle id="mapVehicle" cx="80" cy="190" r="7" fill="#00a8e8" stroke="#0a0a0f" stroke-width="3"/>
+                            </svg>
+                            <div class="map-legend"><span><i class="legend-line"></i>Raw GPS</span><span><i class="legend-line corrected"></i>Road-matched</span></div>
+                        </div>
+                        <div class="map-api-list">
+                            <div class="api-step"><strong>1. Vehicle telemetry</strong><span>GPS latitude/longitude arrives every few seconds with heading, speed and timestamp.</span><span class="api-chip">AWS IoT / Kinesis</span></div>
+                            <div class="api-step"><strong>2. Coordinate correction</strong><span>Send a batch of GPS points to Google Roads API → Snap to Roads to map noisy coordinates onto the road network.</span><span class="api-chip">Google Roads API</span></div>
+                            <div class="api-step"><strong>3. Route intelligence</strong><span>Use corrected positions for route display, ETA, geofencing, replay and downstream analytics.</span><span class="api-chip">Routes API / Maps JS</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+    </section>
+
+
+
+    
+
+
+    
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-social">
+            <a href="https://www.linkedin.com/in/sonu-ansari-88927120a" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="https://github.com/Sonu-Ansari-Dev" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="#" class="obf-link" data-obf="email" rel="nofollow">Email</a>
+            <a href="/">← Back to Profile</a>
+        </div>
+        <p>© <span id="year"></span> Sonu Ansari. All rights reserved.</p>
+        <p>Experiments &amp; demos — the hireable stuff is on the <a href="/">main page</a>.</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+        window.__siteReady = true;
+// ================================================================
+// ================================================================
+        // 0. CONTACT INFO DE-OBFUSCATION
+        // Email is assembled here at runtime instead of sitting as plain
+        // text in the page source, so basic scraping bots (the kind that
+        // harvest contact info for spam emails) that only read static HTML
+        // never see it. Real visitors get a normal working mailto: link
+        // the instant the page loads.
+        // ================================================================
+        (function() {
+            var emailUser = 'connect',
+                emailDomain = 'sonuansari.online',
+                email = emailUser + '@' + emailDomain;
+
+            document.querySelectorAll('[data-obf="email"]').forEach(function(el) {
+                el.setAttribute('href', 'mailto:' + email);
+                if (!/[📧]/.test(el.textContent)) el.textContent = email;
+            });
+        })();
+
+        // ================================================================
+// ================================================================
+        // 1. SCROLL REVEAL
+        // ================================================================
+        (function() {
+            var els = document.querySelectorAll('.reveal');
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) {
+                    if (e.isIntersecting) e.target.classList.add('visible');
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+            els.forEach(function(el) { observer.observe(el); });
+        })();
+
+        // ================================================================
+// ================================================================
+        // 2. NAVBAR SCROLL
+        // ================================================================
+        (function() {
+            var nav = document.getElementById('navbar');
+            function update() { nav.classList.toggle('scrolled', window.pageYOffset > 100); }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        })();
+
+        // ================================================================
+// ================================================================
+        // 3. SCROLL TO TOP
+        // ================================================================
+        (function() {
+            var btn = document.getElementById('scrollTop');
+            window.addEventListener('scroll', function() {
+                btn.classList.toggle('show', window.pageYOffset > 400);
+            }, { passive: true });
+            btn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        })();
+
+        // ================================================================
+// ================================================================
+        // 4. PARTICLES
+        // ================================================================
+        (function() {
+            var canvas = document.getElementById('particles');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var particles = [];
+            var animId = null;
+            var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function resize() { canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight; }
+            resize();
+            window.addEventListener('resize', resize);
+
+            function Particle() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.r = Math.random() * 1.5 + 0.5;
+                this.o = Math.random() * 0.5 + 0.1;
+            }
+            Particle.prototype.update = function() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            };
+            Particle.prototype.draw = function() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 212, 170, ' + this.o + ')';
+                ctx.fill();
+            };
+
+            function init() {
+                particles = [];
+                var count = Math.min(window.innerWidth / 15, 80);
+                for (var i = 0; i < count; i++) particles.push(new Particle());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(function(p) { p.update();
+                    p.draw(); });
+                for (var i = 0; i < particles.length; i++) {
+                    for (var j = i + 1; j < particles.length; j++) {
+                        var dx = particles[i].x - particles[j].x;
+                        var dy = particles[i].y - particles[j].y;
+                        var d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = 'rgba(0, 212, 170, ' + (0.08 * (1 - d / 120)) + ')';
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                animId = requestAnimationFrame(animate);
+            }
+
+            if (prefersReducedMotion) {
+                canvas.style.display = 'none';
+            } else {
+                init();
+                animate();
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) { if (animId) cancelAnimationFrame(animId);
+                        animId = null; } else if (!animId) animate();
+                });
+            }
+        })();
+
+        // ================================================================
+// ================================================================
+        // 5. MOBILE NAV
+        // ================================================================
+        (function() {
+            var btn = document.getElementById('mobileMenuBtn');
+            var menu = document.getElementById('primaryNav');
+            if (!btn || !menu) return;
+
+            function close() {
+                menu.classList.remove('active');
+                btn.classList.remove('active');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.setAttribute('aria-label', 'Open navigation');
+            }
+            btn.addEventListener('click', function() {
+                var open = !menu.classList.contains('active');
+                menu.classList.toggle('active', open);
+                btn.classList.toggle('active', open);
+                btn.setAttribute('aria-expanded', String(open));
+                btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+            });
+            document.addEventListener('click', function(e) {
+                if (!menu.contains(e.target) && !btn.contains(e.target)) close();
+            });
+            window.addEventListener('resize', function() { if (window.innerWidth > 1180) close(); }, { passive: true });
+        })();
+
+        // ================================================================
+// ================================================================
+        // 6. SMOOTH SCROLL
+        // ================================================================
+        document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+            a.addEventListener('click', function(e) {
+                var href = this.getAttribute('href');
+                if (!href || href === '#') { e.preventDefault(); return; }
+                var target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.querySelector('.nav-links').classList.remove('active');
+                    var mmb = document.getElementById('mobileMenuBtn');
+                    if (mmb) { mmb.classList.remove('active');
+                        mmb.setAttribute('aria-expanded', 'false'); }
+                }
+            });
+        });
+
+        // ================================================================
+// ================================================================
+        // 9. PATHFINDING
+        // ================================================================
+        (function() {
+            var canvas = document.getElementById('pathfindCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var compact = window.innerWidth < 640;
+            canvas.width = compact ? 720 : 900;
+            canvas.height = compact ? 400 : 360;
+            var cols = compact ? 12 : 18,
+                rows = compact ? 8 : 10,
+                cellW = canvas.width / cols,
+                cellH = canvas.height / rows;
+            var start = { r: rows - 2, c: 1 },
+                goal = { r: 1, c: cols - 2 };
+            var grid = [],
+                visited = [],
+                path = [],
+                running = false,
+                timer = null,
+                algorithm = 'astar';
+            var statusEl = document.getElementById('pathStatus');
+
+            function key(n) { return n.r + ',' + n.c; }
+
+            function resetGrid() {
+                grid = Array.from({ length: rows }, function() { return Array(cols).fill(false); });
+                var wallCols = compact ? [3, 6, 9] : [4, 9, 14];
+                var gapRows = compact ? [[2, 5], [4], [2, 6]] : [[2, 7], [5], [2, 8]];
+                wallCols.forEach(function(wc, wi) {
+                    for (var r = 1; r < rows - 1; r++) {
+                        if (gapRows[wi].indexOf(r) !== -1) continue;
+                        if (r === start.r || r === goal.r) continue;
+                        grid[r][wc] = true;
+                    }
+                });
+                grid[start.r][start.c] = false;
+                grid[goal.r][goal.c] = false;
+                visited = [];
+                path = [];
+                draw();
+                if (statusEl) statusEl.textContent = 'Click cells to add/remove obstacles';
+            }
+
+            function clearGrid() {
+                if (running) stopRun();
+                grid = Array.from({ length: rows }, function() { return Array(cols).fill(false); });
+                visited = [];
+                path = [];
+                draw();
+                if (statusEl) statusEl.textContent = 'Open grid, choose obstacles or run';
+            }
+
+            function randomize() {
+                if (running) stopRun();
+                for (var r = 0; r < rows; r++)
+                    for (var c = 0; c < cols; c++) grid[r][c] = Math.random() < 0.22;
+                grid[start.r][start.c] = false;
+                grid[goal.r][goal.c] = false;
+                visited = [];
+                path = [];
+                draw();
+                if (statusEl) statusEl.textContent = 'Random obstacles generated';
+            }
+
+            function neighbors(n) {
+                return [
+                    [1, 0],
+                    [-1, 0],
+                    [0, 1],
+                    [0, -1]
+                ].map(function(d) { return { r: n.r + d[0], c: n.c + d[1] }; }).filter(function(x) { return x.r >= 0 &&
+                        x.r < rows && x.c >= 0 && x.c < cols && !grid[x.r][x.c]; });
+            }
+
+            function heuristic(a, b) { return Math.abs(a.r - b.r) + Math.abs(a.c - b.c); }
+
+            function setRunUI(on) { var b = document.getElementById('pathRun'); b.textContent = on ? '■ Stop' : '▶ Run'; b.classList.toggle('running', on); }
+            function stopRun() { clearTimeout(timer); running = false; setRunUI(false); if (statusEl) statusEl.textContent = 'Stopped'; draw(); }
+
+            function solve() {
+                if (running) { stopRun(); return; }
+                visited = [];
+                path = [];
+                running = true;
+                setRunUI(true);
+                var queue = [start],
+                    parent = {},
+                    seen = {};
+                seen[key(start)] = true;
+                var dist = {};
+                dist[key(start)] = 0;
+                var open = [{ n: start, g: 0, f: heuristic(start, goal) }],
+                    closed = {};
+
+                function chooseAStar() { open.sort(function(a, b) { return a.f - b.f || a.g - b.g; }); return open
+                        .shift(); }
+
+                function step() {
+                    if (algorithm === 'bfs') {
+                        if (!queue.length) return finish(false);
+                        var n = queue.shift();
+                        visited.push(n);
+                        if (n.r === goal.r && n.c === goal.c) return finish(true, n);
+                        neighbors(n).forEach(function(nb) { var k = key(nb); if (!seen[k]) { seen[k] = true;
+                                parent[k] = n;
+                                queue.push(nb); } });
+                    } else {
+                        var item = chooseAStar();
+                        if (!item) return finish(false);
+                        var n2 = item.n,
+                            k2 = key(n2);
+                        if (closed[k2]) return schedule();
+                        closed[k2] = true;
+                        visited.push(n2);
+                        if (n2.r === goal.r && n2.c === goal.c) return finish(true, n2);
+                        neighbors(n2).forEach(function(nb) {
+                            var k = key(nb),
+                                g = item.g + 1;
+                            if (closed[k]) return;
+                            if (dist[k] === undefined || g < dist[k]) { dist[k] = g;
+                                parent[k] = n2; var h = algorithm === 'astar' ? heuristic(nb, goal) : 0;
+                                open.push({ n: nb, g: g, f: g + h }); }
+                        });
+                    }
+                    draw();
+                    if (statusEl) statusEl.textContent = algorithm.toUpperCase() + ' exploring ' + visited.length +
+                        ' nodes…';
+                    timer = setTimeout(step, 32);
+                }
+
+                function schedule() { timer = setTimeout(step, 10); }
+
+                function finish(found, last) {
+                    if (found) { var cur = last;
+                        path = []; while (cur) { path.unshift(cur);
+                            cur = parent[key(cur)]; } if (statusEl) statusEl.textContent = algorithm.toUpperCase() +
+                            ' found ' + path.length + ' nodes after exploring ' + visited.length; } else if (statusEl)
+                        statusEl.textContent = 'No path found, add a gap or clear some obstacles';
+                    running = false;
+                    setRunUI(false);
+                    draw();
+                }
+                step();
+            }
+
+            function cssVar(name, fb) { var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+                v = v ? v.trim() : ''; return v || fb; }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                var col = {
+                    obstacle: cssVar('--pf-obstacle', '#1c1c28'),
+                    cell: cssVar('--pf-cell', '#0a0a0f'),
+                    gridline: cssVar('--pf-grid', 'rgba(255,255,255,.05)'),
+                    visited: cssVar('--pf-visited', 'rgba(0,212,170,.12)'),
+                    pathfill: cssVar('--pf-pathfill', 'rgba(0,212,170,.28)'),
+                    path: cssVar('--pf-path', '#00d4aa'),
+                    start: cssVar('--pf-start', '#00a8e8'),
+                    goal: cssVar('--pf-goal', '#f59e0b')
+                };
+                var vis = {};
+                visited.forEach(function(n) { vis[key(n)] = true; });
+                var pat = {};
+                path.forEach(function(n) { pat[key(n)] = true; });
+                for (var r = 0; r < rows; r++) {
+                    for (var c = 0; c < cols; c++) {
+                        var x = c * cellW,
+                            y = r * cellH,
+                            k = r + ',' + c;
+                        ctx.fillStyle = grid[r][c] ? col.obstacle : pat[k] ? col.pathfill : vis[k] ? col.visited : col
+                        .cell;
+                        ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
+                        ctx.strokeStyle = col.gridline;
+                        ctx.strokeRect(x, y, cellW, cellH);
+                    }
+                }
+                if (path.length) {
+                    ctx.strokeStyle = col.path;
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    path.forEach(function(n, i) { var x = n.c * cellW + cellW / 2,
+                            y = n.r * cellH + cellH / 2;
+                        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+                    ctx.stroke();
+                }
+
+                function node(n, color) { ctx.beginPath();
+                    ctx.arc(n.c * cellW + cellW / 2, n.r * cellH + cellH / 2, Math.min(cellW, cellH) * .25, 0, Math.PI *
+                        2);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = col.cell;
+                    ctx.stroke(); }
+                node(start, col.start);
+                node(goal, col.goal);
+            }
+            canvas.addEventListener('click', function(e) {
+                if (running) return;
+                var rect = canvas.getBoundingClientRect();
+                var c = Math.floor((e.clientX - rect.left) * canvas.width / rect.width / cellW);
+                var r = Math.floor((e.clientY - rect.top) * canvas.height / rect.height / cellH);
+                if ((r === start.r && c === start.c) || (r === goal.r && c === goal.c)) return;
+                grid[r][c] = !grid[r][c];
+                visited = [];
+                path = [];
+                draw();
+                if (statusEl) statusEl.textContent = grid[r][c] ? 'Obstacle added' : 'Obstacle removed';
+            });
+            document.querySelectorAll('.path-algo-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.path-algo-btn').forEach(function(b) { b.classList.remove(
+                        'active'); });
+                    btn.classList.add('active');
+                    algorithm = btn.dataset.algo;
+                    if (statusEl) statusEl.textContent = 'Algorithm: ' + algorithm.toUpperCase();
+                });
+            });
+            document.getElementById('pathRun').addEventListener('click', solve);
+            document.getElementById('pathRandom').addEventListener('click', randomize);
+            document.getElementById('pathClear').addEventListener('click', clearGrid);
+            try { new MutationObserver(function() { draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+            resetGrid();
+        })();
+
+        // ================================================================
+// ================================================================
+        // 10. LINE FOLLOWER
+        // ================================================================
+        (function() {
+            var svg = document.getElementById('lineFollowerSvg');
+            if (!svg) return;
+            var path = document.getElementById('trackPath'),
+                robot = document.getElementById('lfRobot'),
+                sensorL = document.getElementById('lfSensorL'),
+                sensorR = document.getElementById('lfSensorR');
+            var len = path.getTotalLength(),
+                t = 0,
+                offset = 18,
+                integral = 0,
+                prevError = 0,
+                rafId = null,
+                running = true;
+            var kp = document.getElementById('lfKp'),
+                ki = document.getElementById('lfKi'),
+                kd = document.getElementById('lfKd');
+            var errorEl = document.getElementById('lfError'),
+                corrEl = document.getElementById('lfCorrection'),
+                leftEl = document.getElementById('lfLeft'),
+                rightEl = document.getElementById('lfRight');
+
+            function updateVals() {
+                document.getElementById('lfKpV').textContent = (+kp.value).toFixed(2);
+                document.getElementById('lfKiV').textContent = (+ki.value).toFixed(2);
+                document.getElementById('lfKdV').textContent = (+kd.value).toFixed(2);
+            }
+            [kp, ki, kd].forEach(function(x) { x.addEventListener('input', updateVals); });
+            updateVals();
+
+            function frame() {
+                var p = path.getPointAtLength(t),
+                    pAhead = path.getPointAtLength(Math.min(t + 2, len)),
+                    angle = Math.atan2(pAhead.y - p.y, pAhead.x - p.x);
+                var sensorSignal = offset / 24 + Math.sin(t * .025) * .03;
+                var error = sensorSignal,
+                    derivative = error - prevError;
+                integral = Math.max(-3, Math.min(3, integral + error * .035));
+                var correction = (+kp.value) * error + (+ki.value) * integral + (+kd.value) * derivative;
+                prevError = error;
+                var base = 50,
+                    left = Math.max(0, Math.min(100, base - correction * 18)),
+                    right = Math.max(0, Math.min(100, base + correction * 18));
+                offset += (-correction * .9 + Math.sin(t * .01) * .02);
+                offset = Math.max(-32, Math.min(32, offset));
+                t += 1.35;
+                if (t > len) t = 0;
+                robot.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ') rotate(' + (angle * 180 / Math.PI) +
+                    ')');
+                sensorL.classList.toggle('active', error > 0.06);
+                sensorR.classList.toggle('active', error < -0.06);
+                errorEl.textContent = error.toFixed(2);
+                corrEl.textContent = correction.toFixed(2);
+                leftEl.textContent = Math.round(left) + '%';
+                rightEl.textContent = Math.round(right) + '%';
+                if (running) rafId = requestAnimationFrame(frame); else rafId = null;
+            }
+            document.getElementById('lfStart').addEventListener('click', function() {
+                running = !running;
+                this.textContent = running ? '⏸ Pause' : '▶ Resume';
+                document.getElementById('lfStatus').textContent = running ? 'PID feedback active' :
+                    'Simulation paused';
+                if (running && !rafId) frame();
+            });
+            document.getElementById('lfReset').addEventListener('click', function() {
+                t = 0;
+                offset = 18;
+                integral = 0;
+                prevError = 0;
+                if (!running) { running = true;
+                    document.getElementById('lfStart').textContent = '⏸ Pause'; }
+                document.getElementById('lfStatus').textContent = 'Reset, PID feedback active';
+                if (!rafId) frame();
+            });
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduceMotion) {
+                running = false;
+                document.getElementById('lfStart').disabled = true;
+                document.getElementById('lfStatus').textContent = 'Reduced motion, simulation paused';
+                frame();
+            } else {
+                var io = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(e) {
+                        if (e.isIntersecting && !rafId && running) frame();
+                        else if (!e.isIntersecting && rafId) { cancelAnimationFrame(rafId);
+                            rafId = null; }
+                    });
+                }, { threshold: .2 });
+                io.observe(svg);
+            }
+        })();
+
+        // ================================================================
+// ================================================================
+        // 11. THEME TOGGLE
+        // ================================================================
+        (function() {
+            var root = document.documentElement,
+                btn = document.getElementById('themeToggle'),
+                thumb = document.getElementById('themeToggleThumb');
+            if (!btn) return;
+            var saved = null; try { saved = localStorage.getItem('sonu-theme'); } catch (e) {}
+            var initial = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ?
+                'light' : 'dark');
+
+            function apply(theme) {
+                root.setAttribute('data-theme', theme);
+                var mt = document.querySelector('meta[name="theme-color"]');
+                if (mt) mt.setAttribute('content', theme === 'light' ? '#f5f7fb' : '#0a0a0f');
+                thumb.textContent = theme === 'light' ? '☀' : '☾';
+                btn.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+                btn.title = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+                try { localStorage.setItem('sonu-theme', theme); } catch (e) {}
+            }
+            apply(initial);
+            btn.addEventListener('click', function() { apply(root.getAttribute('data-theme') === 'light' ? 'dark' :
+                    'light'); });
+        })();
+
+        // ================================================================
+// ================================================================
+        // 12. GPS ROAD-MATCHING
+        // ================================================================
+        (function() {
+            var svg = document.getElementById('mapMatchSvg');
+            if (!svg) return;
+            var rawGroup = document.getElementById('rawPoints'),
+                correctedGroup = document.getElementById('correctedPoints'),
+                vehicle = document.getElementById('mapVehicle');
+            var roadBase = document.getElementById('roadBase'),
+                roadCenter = document.getElementById('roadCenter'),
+                correctedRoute = document.getElementById('correctedRoute');
+            var rawBtn = document.getElementById('mapRawBtn'),
+                corrBtn = document.getElementById('mapCorrectBtn'),
+                randomize = document.getElementById('mapRandomize'),
+                replay = document.getElementById('mapAnimate'),
+                status = document.getElementById('mapStatus');
+            var W = 760,
+                H = 300,
+                roadPts = [],
+                gpsPts = [],
+                matchedPts = [],
+                replayTimer = null,
+                replayIndex = 0;
+            var ns = 'http://www.w3.org/2000/svg';
+
+            function roadPath(pts) { return pts.map(function(p, i) { return (i ? 'L ' : 'M ') + p.x + ' ' + p.y; })
+                .join(' '); }
+
+            function randomRoad() {
+                roadPts = [];
+                var n = 9,
+                    y = H * .60,
+                    slope = (Math.random() - .5) * .12;
+                for (var i = 0; i < n; i++) {
+                    var x = -35 + i * (W + 70) / (n - 1);
+                    var wave = 55 * Math.sin(i * .72 + Math.random() * .8) + (Math.random() - .5) * 28;
+                    y = H * .52 + wave + i * slope * 20;
+                    y = Math.max(48, Math.min(H - 45, y));
+                    roadPts.push({ x: x, y: y });
+                }
+                var d = roadPath(roadPts);
+                roadBase.setAttribute('d', d);
+                roadCenter.setAttribute('d', d);
+                correctedRoute.setAttribute('d', d);
+                generateTelemetry();
+                draw();
+                status.textContent = 'New road generated, corrected points stay on this road';
+            }
+
+            function nearestOnSegment(p, a, b) {
+                var dx = b.x - a.x,
+                    dy = b.y - a.y,
+                    len2 = dx * dx + dy * dy,
+                    t = len2 ? ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2 : 0;
+                t = Math.max(0, Math.min(1, t));
+                return { x: a.x + t * dx, y: a.y + t * dy };
+            }
+
+            function snapToRoad(p) {
+                var best = null,
+                    bestDist = Infinity;
+                for (var i = 1; i < roadPts.length; i++) {
+                    var q = nearestOnSegment(p, roadPts[i - 1], roadPts[i]),
+                        dx = p.x - q.x,
+                        dy = p.y - q.y,
+                        d = dx * dx + dy * dy;
+                    if (d < bestDist) { bestDist = d;
+                        best = q; }
+                }
+                return best;
+            }
+
+            function generateTelemetry() {
+                gpsPts = [];
+                matchedPts = [];
+                for (var i = 0; i < 34; i++) {
+                    var t = i / (34 - 1),
+                        pos = t * (roadPts.length - 1),
+                        k = Math.min(roadPts.length - 2, Math.floor(pos)),
+                        f = pos - k;
+                    var a = roadPts[k],
+                        b = roadPts[k + 1];
+                    var target = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
+                    var noiseX = (Math.random() - .5) * 26,
+                        noiseY = (Math.random() - .5) * 34;
+                    var raw = { x: target.x + noiseX, y: target.y + noiseY };
+                    gpsPts.push(raw);
+                    matchedPts.push(snapToRoad(raw));
+                }
+            }
+
+            function circle(x, y, r, fill, opacity) { var c = document.createElementNS(ns, 'circle');
+                c.setAttribute('cx', x);
+                c.setAttribute('cy', y);
+                c.setAttribute('r', r);
+                c.setAttribute('fill', fill);
+                c.setAttribute('opacity', opacity);
+                return c; }
+
+            function draw() {
+                rawGroup.innerHTML = '';
+                correctedGroup.innerHTML = '';
+                gpsPts.forEach(function(p) { rawGroup.appendChild(circle(p.x, p.y, 3, '#f59e0b', rawBtn.classList
+                        .contains('active') ? .82 : 0)); });
+                matchedPts.forEach(function(p) { correctedGroup.appendChild(circle(p.x, p.y, 2.8, '#00d4aa', corrBtn
+                        .classList.contains('active') ? .9 : 0)); });
+                if (matchedPts.length) { vehicle.setAttribute('cx', matchedPts[0].x);
+                    vehicle.setAttribute('cy', matchedPts[0].y); }
+            }
+
+            function toggle(btn) { btn.classList.toggle('active');
+                draw(); }
+            rawBtn.addEventListener('click', function() { toggle(rawBtn); });
+            corrBtn.addEventListener('click', function() { toggle(corrBtn); });
+            randomize.addEventListener('click', function() { if (replayTimer) { clearInterval(replayTimer);
+                    replayTimer = null; }
+                randomRoad(); });
+            replay.addEventListener('click', function() {
+                if (replayTimer) { clearInterval(replayTimer);
+                    replayTimer = null;
+                    replay.textContent = '▶ Replay'; return; }
+                replayIndex = 0;
+                replay.textContent = '⏸ Stop';
+                status.textContent = 'Vehicle replay, raw GPS noisy, corrected position follows road';
+                replayTimer = setInterval(function() {
+                    if (replayIndex >= matchedPts.length) { clearInterval(replayTimer);
+                        replayTimer = null;
+                        replay.textContent = '▶ Replay';
+                        status.textContent = 'Replay complete, every corrected point lies on the visible road'; return; }
+                    var raw = gpsPts[replayIndex],
+                        matched = matchedPts[replayIndex];
+                    vehicle.setAttribute('cx', matched.x);
+                    vehicle.setAttribute('cy', matched.y);
+                    status.textContent = 'Point ' + (replayIndex + 1) + ', raw offset ' + Math.round(Math.hypot(
+                        raw.x - matched.x, raw.y - matched.y)) + ' px, snapped to road';
+                    replayIndex++;
+                }, 90);
+            });
+            randomRoad();
+        })();
+
+        // ================================================================
+// ================================================================
+        // 14. GEOFENCING
+        // ================================================================
+        (function() {
+            var canvas = document.getElementById('geofenceCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var w = canvas.width,
+                h = canvas.height;
+            var cx = w / 2,
+                cy = h / 2;
+            var fenceRadius = 120;
+            var shape = 'circle';
+            var ngonSides = 5;
+            var t = 0;
+            var rafId = null;
+            var trail = [];
+            var alertEl = document.getElementById('geofenceAlert');
+
+            function polygonPoints(sides) {
+                var pts = [];
+                for (var i = 0; i < sides; i++) {
+                    var a = -Math.PI / 2 + (i * 2 * Math.PI) / sides;
+                    pts.push({ x: cx + fenceRadius * Math.cos(a), y: cy + fenceRadius * Math.sin(a) * 0.82 });
+                }
+                return pts;
+            }
+
+            function pointInPolygon(px, py, pts) {
+                var inside = false;
+                for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+                    var xi = pts[i].x,
+                        yi = pts[i].y,
+                        xj = pts[j].x,
+                        yj = pts[j].y;
+                    var intersect = ((yi > py) !== (yj > py)) &&
+                        (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+                    if (intersect) inside = !inside;
+                }
+                return inside;
+            }
+
+            function isInside(px, py) {
+                if (shape === 'circle') {
+                    var dx = px - cx,
+                        dy = (py - cy) / 0.82;
+                    return Math.sqrt(dx * dx + dy * dy) <= fenceRadius;
+                }
+                var sides = ngonSides;
+                return pointInPolygon(px, py, polygonPoints(sides));
+            }
+
+            function drawFence(breached) {
+                ctx.save();
+                ctx.strokeStyle = breached ? 'rgba(239,68,68,0.7)' : 'rgba(0,212,170,0.5)';
+                ctx.lineWidth = breached ? 3 : 2;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                if (shape === 'circle') {
+                    ctx.ellipse(cx, cy, fenceRadius, fenceRadius * 0.82, 0, 0, Math.PI * 2);
+                } else {
+                    var sides = ngonSides;
+                    var pts = polygonPoints(sides);
+                    pts.forEach(function(p, i) { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
+                    ctx.closePath();
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                ctx.lineWidth = 1;
+                for (var x = 0; x < w; x += 30) { ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, h);
+                    ctx.stroke(); }
+                for (var y = 0; y < h; y += 30) { ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke(); }
+            }
+
+            function render(tt) {
+                ctx.clearRect(0, 0, w, h);
+                drawGrid();
+                var angle = tt * 0.6;
+                var dist = 95 + 55 * Math.sin(tt * 0.9);
+                var vx = cx + dist * Math.cos(angle);
+                var vy = cy + dist * Math.sin(angle) * 0.82;
+                var inside = isInside(vx, vy);
+                drawFence(!inside);
+                trail.push({ x: vx, y: vy, inside: inside });
+                if (trail.length > 40) trail.shift();
+                trail.forEach(function(p, i) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = p.inside ?
+                        'rgba(0,212,170,' + ((i / trail.length) * 0.5) + ')' :
+                        'rgba(239,68,68,' + ((i / trail.length) * 0.5) + ')';
+                    ctx.fill();
+                });
+                var pulse = 8 + Math.sin(tt * 4) * 2;
+                ctx.beginPath();
+                ctx.arc(vx, vy, pulse, 0, Math.PI * 2);
+                ctx.fillStyle = inside ? 'rgba(0,212,170,0.15)' : 'rgba(239,68,68,0.2)';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(vx, vy, 6, 0, Math.PI * 2);
+                ctx.fillStyle = inside ? '#00d4aa' : '#ef4444';
+                ctx.fill();
+                ctx.strokeStyle = '#0a0a0f';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                if (alertEl) alertEl.classList.toggle('show', !inside);
+            }
+
+            function loop() { t += 0.02;
+                render(t);
+                rafId = requestAnimationFrame(loop); }
+
+            function start_() { if (!rafId) rafId = requestAnimationFrame(loop); }
+
+            function stop_() { if (rafId) { cancelAnimationFrame(rafId);
+                    rafId = null; } }
+
+            document.querySelectorAll('.shape-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.shape-btn').forEach(function(b) { b.classList.remove(
+                        'active'); });
+                    btn.classList.add('active');
+                    shape = btn.dataset.shape;
+                    document.getElementById('ngonSliderWrap').classList.toggle('active', shape === 'ngon');
+                    if (prefersReducedMotion) render(t);
+                });
+            });
+            var slider = document.getElementById('ngonSlider');
+            var sliderValue = document.getElementById('ngonSliderValue');
+            if (slider) {
+                slider.addEventListener('input', function() {
+                    ngonSides = parseInt(slider.value, 10);
+                    sliderValue.textContent = ngonSides + ' sides';
+                    if (prefersReducedMotion) render(t);
+                });
+            }
+            var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion) {
+                render(2);
+            } else {
+                var io = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(e) {
+                        if (e.isIntersecting) start_();
+                        else stop_();
+                    });
+                }, { threshold: 0.2 });
+                io.observe(canvas);
+            }
+        })();
+
+        // ================================================================
+// ================================================================
+        
+    </script>
+    <script src="cat.js?v=20261009" defer></script>
+</body>
+</html>

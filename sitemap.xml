@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://sonuansari.online/</loc>
-    <lastmod>2026-09-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-10-07</lastmod>
+    <image:image>
+      <image:loc>https://sonuansari.online/logo.png</image:loc>
+      <image:title>Sonu Ansari, Senior AWS Data Engineer</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://sonuansari.online/playground</loc>
+    <lastmod>2026-10-07</lastmod>
   </url>
 </urlset>
