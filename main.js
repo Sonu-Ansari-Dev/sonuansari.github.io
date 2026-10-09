@@ -258,3 +258,20 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     reset.addEventListener('click', resetAll);
     resetAll();
 })();
+
+/* 10. Nav scroll-spy: highlight the link for the section in view */
+(function () {
+    var links = [].slice.call(document.querySelectorAll('.nav-links a[href^="#"]'));
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    var map = {};
+    links.forEach(function (l) { map[l.getAttribute('href').slice(1)] = l; });
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            links.forEach(function (l) { l.classList.remove('active'); });
+            var l = map[e.target.id];
+            if (l) l.classList.add('active');
+        });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    Object.keys(map).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+})();
