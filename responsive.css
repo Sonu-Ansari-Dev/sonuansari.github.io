@@ -110,3 +110,28 @@ footer { padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); padding-
     .path-toolbar .tb-right { width: 100%; justify-content: space-between; }
     .path-toolbar .demo-readout { width: auto; flex: 1; min-width: 0; }
 }
+
+/* ================= Navigation v2: pill links + round theme button ================= */
+/* Theme toggle becomes a round sun/moon icon button (no cramped switch) */
+.theme-toggle { width: 40px !important; height: 40px !important; border-radius: 50% !important; overflow: visible; }
+.theme-toggle-track { display: none !important; }
+.theme-toggle-thumb { position: static !important; width: 100% !important; height: 100% !important; transform: none !important; background: transparent !important; color: var(--text) !important; font-size: 1.1rem; border-radius: 50%; display: grid; place-items: center; }
+.theme-toggle:hover .theme-toggle-thumb { transform: rotate(25deg) scale(1.12) !important; color: var(--accent) !important; }
+@media (pointer: coarse) { .theme-toggle { width: 44px !important; height: 44px !important; } }
+
+/* Active section highlight (also used inside the mobile dropdown) */
+.nav-links a.active { color: var(--accent); background: var(--accent-glow); }
+
+/* Desktop: logo left, floating pill of links, theme button far right */
+@media (min-width: 1181px) {
+    .nav-inner { gap: 1rem; }
+    .nav-logo { order: 1; }
+    .nav-links { order: 2; margin-left: auto; gap: .1rem; padding: .3rem; background: var(--bg-card); background: color-mix(in srgb, var(--bg-card) 70%, transparent); border: 1px solid var(--border); border-radius: 999px; }
+    .nav-actions { order: 3; margin-left: .35rem; }
+    .nav-links a { padding: .42rem .7rem; border-radius: 999px; font-size: .8rem; transition: color .2s, background .2s; }
+    .nav-links a::after { display: none; }
+    .nav-links a:hover { background: var(--accent-glow); color: var(--text); }
+    .nav-links a.active { background: var(--accent-dim); color: var(--accent); }
+    .nav-links a.nav-extras { margin-left: .25rem; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); }
+    .nav-links a.nav-extras:hover { background: var(--accent-dim); }
+}
